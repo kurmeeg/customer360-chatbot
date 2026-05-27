@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer 360 – Ask AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#ffffff;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  /* ── Collapsed: vertical centered button ── */
+  .collapsed{
+    height:100%;width:100%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:#ffffff;cursor:pointer;
+  }
+  .collapsed:hover .fab{transform:scale(1.08)}
+  .collapsed.hidden{display:none}
+  .fab{
+    width:50px;height:50px;background:linear-gradient(135deg,#3b82f6,#6366f1);
+    border-radius:14px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 20px rgba(59,130,246,0.35);transition:transform 0.2s;
+  }
+  .fab img{width:28px;height:28px;object-fit:contain;border-radius:5px}
+  .fab-label{margin-top:6px;font-size:10px;color:#3b5458;font-weight:500}
+
+  /* ── Expanded: full vertical chat ── */
+  .expanded{
+    height:100%;width:100%;display:none;flex-direction:column;background:#ffffff;
+  }
+  .expanded.active{display:flex}
+
+  /* ── Header ── */
+  .hdr{
+    padding:6px 8px;display:flex;align-items:center;gap:6px;
+    border-bottom:1px solid rgba(59,90,96,0.2);background:rgba(255,255,255,0.5);
+    flex-shrink:0;backdrop-filter:blur(10px);
+  }
+  .hdr-icon{
+    width:24px;height:24px;background:linear-gradient(135deg,#3b82f6,#6366f1);
+    border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .hdr-icon img{width:16px;height:16px;object-fit:contain;border-radius:2px}
+  .hdr-txt h1{font-size:10px;font-weight:600;color:#1e293b}
+  .hdr-txt p{font-size:7px;color:#64748b;margin-top:0px}
+  .btn-min{
+    margin-left:auto;width:22px;height:22px;background:rgba(255,255,255,0.6);
+    border:1px solid rgba(59,90,96,0.2);border-radius:5px;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;color:#64748b;
+    font-size:12px;line-height:1;
+  }
+  .btn-min:hover{background:rgba(255,255,255,0.9);color:#1e293b}
+
+  /* ── Desc text ── */
+  .desc{
+    padding:4px 10px;font-size:8px;color:#475569;line-height:1.35;
+    border-bottom:1px solid rgba(59,90,96,0.12);background:rgba(255,255,255,0.3);
+    flex-shrink:0;
+  }
+
+  /* ── API bar ── */
+  .api-bar{
+    padding:5px 10px;border-bottom:1px solid rgba(59,90,96,0.12);
+    background:rgba(255,255,255,0.3);display:flex;align-items:center;gap:4px;
+    flex-shrink:0;
+  }
+  .api-bar label{font-size:7px;color:#64748b;white-space:nowrap}
+  .api-input{
+    flex:1;background:rgba(255,255,255,0.7);border:1px solid rgba(59,90,96,0.18);
+    border-radius:4px;padding:2px 5px;font-size:7px;font-family:'JetBrains Mono',monospace;
+    color:#1e293b;outline:none;min-width:0;
+  }
+  .api-input:focus{border-color:#3b82f6}
+  .api-input::placeholder{color:#94a3b8}
+  .btn-save{
+    background:#3b82f6;color:#fff;border:none;border-radius:4px;
+    padding:2px 6px;font-size:7px;font-weight:500;cursor:pointer;
+    font-family:'DM Sans',sans-serif;
+  }
+  .btn-save.saved{background:#059669}
+
+  /* ── Chat area ── */
+  .chat-area{
+    flex:1;overflow-y:auto;padding:8px;display:flex;
+    flex-direction:column;gap:8px;scroll-behavior:smooth;
+  }
+  .chat-area::-webkit-scrollbar{width:2px}
+  .chat-area::-webkit-scrollbar-thumb{background:rgba(59,90,96,0.2);border-radius:2px}
+
+  /* ── Suggestions ── */
+  .suggestions{display:flex;flex-direction:column;gap:4px;padding:0 2px}
+  .suggestion{
+    background:rgba(255,255,255,0.55);border:1px solid rgba(59,90,96,0.15);border-radius:8px;
+    padding:6px 8px;font-size:8px;color:#475569;cursor:pointer;
+    transition:all 0.2s;font-family:'DM Sans',sans-serif;text-align:left;
+  }
+  .suggestion:hover{border-color:#3b82f6;color:#1e293b;background:rgba(255,255,255,0.8)}
+
+  /* ── Messages ── */
+  .msg{display:flex;gap:5px;max-width:98%;animation:msgIn 0.25s ease-out}
+  @keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+  .msg.user{align-self:flex-end;flex-direction:row-reverse}
+  .msg.ai{align-self:flex-start}
+  .msg-avatar{
+    width:20px;height:20px;border-radius:5px;display:flex;
+    align-items:center;justify-content:center;font-size:7px;font-weight:700;
+    flex-shrink:0;margin-top:1px;color:#fff;
+  }
+  .msg.user .msg-avatar{background:#3b82f6}
+  .msg.ai .msg-avatar{background:linear-gradient(135deg,#3b82f6,#6366f1)}
+  .msg-body{
+    padding:5px 7px;border-radius:8px;font-size:8px;line-height:1.45;
+    white-space:pre-wrap;word-break:break-word;
+    -webkit-user-select:none;-moz-user-select:none;user-select:none;
+  }
+  .msg.user .msg-body{background:#3b82f6;border-bottom-right-radius:2px;color:#fff}
+  .msg.ai .msg-body{background:rgba(255,255,255,0.65);border:1px solid rgba(59,90,96,0.12);border-bottom-left-radius:2px;color:#1e293b}
+  .msg.ai .msg-body strong{color:#1d4ed8;font-weight:600}
+  .msg.ai .msg-body code{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,0.05);padding:0 2px;border-radius:2px;font-size:7px}
+
+  .typing{display:flex;gap:3px;padding:3px 0}
+  .typing span{width:4px;height:4px;border-radius:50%;background:#94a3b8;animation:blink 1.4s infinite both}
+  .typing span:nth-child(2){animation-delay:0.2s}
+  .typing span:nth-child(3){animation-delay:0.4s}
+  @keyframes blink{0%,80%,100%{opacity:0.25;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+
+  /* ── Footer / disclaimer ── */
+  .footer{
+    padding:3px 10px;font-size:6px;color:#94a3b8;text-align:center;
+    border-top:1px solid rgba(59,90,96,0.1);background:rgba(255,255,255,0.2);
+    flex-shrink:0;
+  }
+
+  /* ── Input bar ── */
+  .input-bar{
+    padding:6px 8px;border-top:1px solid rgba(59,90,96,0.15);
+    background:rgba(255,255,255,0.45);display:flex;align-items:flex-end;gap:5px;
+    flex-shrink:0;backdrop-filter:blur(8px);
+  }
+  .input-wrap{
+    flex:1;background:rgba(255,255,255,0.7);border:1px solid rgba(59,90,96,0.18);
+    border-radius:7px;display:flex;align-items:flex-end;
+    transition:border-color 0.2s;min-height:26px;
+  }
+  .input-wrap:focus-within{border-color:#3b82f6}
+  #userInput{
+    flex:1;background:transparent;border:none;padding:6px 7px;
+    font-size:8px;color:#1e293b;outline:none;resize:none;
+    max-height:60px;line-height:1.4;font-family:'DM Sans',sans-serif;
+  }
+  #userInput::placeholder{color:#94a3b8}
+  .btn-send{
+    width:26px;height:26px;background:#3b82f6;border:none;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:all 0.2s;flex-shrink:0;
+  }
+  .btn-send:hover{opacity:0.85}
+  .btn-send:disabled{opacity:0.35;cursor:not-allowed}
+  .btn-send svg{width:12px;height:12px}
+</style>
+</head>
+<body>
+
+<!-- Collapsed -->
+<div class="collapsed" id="collapsedView" onclick="expandChat()">
+  <div class="fab"><img src="data:image/png;base64,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" alt="EG"/></div>
+  <div class="fab-label">Engage & Amplify</div>
+</div>
+
+<!-- Expanded -->
+<div class="expanded" id="expandedView">
+  <div class="hdr">
+    <div class="hdr-icon"><img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAwADkDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAABwgABQYECf/EAD4QAAECBQMBBAMLDQAAAAAAAAECAwAEBQYRBxIhCBMxQWEUgZEVIjJRVXWhorLD0hcYIzY3UmaUo6WzweP/xAAZAQACAwEAAAAAAAAAAAAAAAADBgIEBQf/xAAxEQABAwMBAwgLAAAAAAAAAAABAAIDBAURIQYSMRVBYXGRodHSExYXIlFSU4GisfD/2gAMAwEAAhEDEQA/AHLgWal64WxZlWdoyJaaqtRZH6ZtghLbSv3VLPjz4A48eYKcIdrKSdV7nz8pvfaMFiYHHVQe4tGiOzfULVXMKTpjVFNn4KkzSjn+jBAtbURVY06q94TlvTtLTTA8VSjyvfuBtsLyklI4Ocd3eDGFTf8ArilISnTGVAAwAEL4+vGnqFVues6FXTOXbREUeo+gTiBLozgoDRwrkkjPPsiE/uxkgd6sUTBLURsdwJAP3KwB6oBk4sckeBNVx9zET1QDcN1jkDPJFVz9zC4xIUeU6r5u4eC716kWP6H5P8y9EKLPIqdHkqk2goRNy7b6Uk5KQtIUB9MdcUth/qNQPmyW/wASYuoamHLQSuDVDAyVzRwBP7UhcNZ9CbgrF3T1xWw/KzTc+4XnZZ5zslocPftJ96oE88kYz64Y+FT1O1l1ApGoFbpVMqzMvJyc4tllv0RpWEpOOSpJJgU9a2kAc7nWlZrBUXuR0UBALRnUkdHMCthIv9S7bSJddPpi9gCe2eXLEq8ztX/qN1IU2/a3pTcFJu8U8VydYmGJUS5ARsU0AgKI4B3FXqxC5fl21O+X2v5Fj8EHvp9vqq3Rp/U63dM20tchNuIW+loIAaS0hZJCRjjKu4QCK5Q1Z9E0Yz/fFatx2SuFkiFbI5pDSOBJ1zpxAQEOhGpwJHuC0fP05j8cQaEanEgGgsjzM8xx9eN49rbft6XJ7i6dUGXbxuWku4cdUgYG5RUQhA5HtHMXLS+pdDiVqapTgByUKMtg+XBB+mIchQji49o8Fe9pN05mM7HeZGm15N6nWzS6fMY7aVk2WXMHI3JQAfpEWMctHVOrpEmqpoQ3PFhBmUo+ClzaNwHfxnMdUaAGBhI73mRxeeJ1UhEdZf2rXP8AOT32jD3QC736eW7kuypV5u7FSYnn1Plk0/tNhUckbu0GfZGbc6eSdjRGM6py2Iu9Ha6qR9W/dBbgaE656AUrEMd0+sPTPT3fMtLJUp530xDYT3lRlEgAeuJ+a/8Axx/af+0FnR+wWtPLbfpDdTXUVPzJmFuqZ7PkpSnATk8YSPGKluop4Zw97cDrCY9r9prZcLa6Cml3nEjTDhw6wEAujublWNRKiw86ht2YpqkshRAKyHEEpHngZx5GNDrTqrqPZN+zVJaVTmZJxIfkQphK1KZJKQSc9+Uq4Mau9uny2q1VnKpRKjM0CYdcLi22mw4yFHnKE5SU884BwPACKRfTWibdS7Vr6n51wJ27jKc4+IFTiuOTDNvMLt4rkWHAYCN1rTr1StilVGZ29tNSTLzm0YG5SAo4HxZMWUclGkW6XR5KmNLUtuUl22EKV3qCEhIJ8+I64rlFX//Z" alt="EG"/></div>
+    <div class="hdr-txt"><h1>Customer 360 – Ask AI</h1><p>Engage & Amplify</p></div>
+    <svg style="margin-left:auto;cursor:pointer;opacity:0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><svg style="cursor:pointer;opacity:0.5;margin-left:2px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg><button class="btn-min" onclick="collapseChat()">✕</button>
+  </div>
+  <div class="desc">Describe the question you want, in your own words, and Ask AI will answer it quickly.</div>
+  <div class="api-bar">
+    <label>Key:</label>
+    <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="btn-save" id="btnSave" onclick="saveApiKey()">Save</button>
+  </div>
+  <div class="chat-area" id="chatArea">
+    <div class="suggestions" id="suggestionsBlock">
+      <button class="suggestion" onclick="askSuggestion(this)">Region Hovedstaden revenue trend 2024 vs 2025</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Coop Norge month-on-month revenue</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Ejerkredsen Øs Indsigt 2024 vs 2025 growth</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Revenue breakdown by Division and BU</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Which BU has the most support cases?</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Pipeline ARR: Construction vs Healthcare</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Digital Welfare monthly revenue trend</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Sykehuspartner Hf revenue growth</button>
+    </div>
+  </div>
+  <div class="footer">AI-generated content may have mistakes. Always verify with the dashboard visuals.</div>
+  <div class="input-bar">
+    <div class="input-wrap"><textarea id="userInput" rows="1" placeholder="Ask about your data..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea></div>
+    <button class="btn-send" id="btnSend" onclick="sendMessage()"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+</div>
+
+<script>
+let API_KEY='',conversationHistory=[],isLoading=false;
+
+// Safe localStorage wrapper
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+// Restore state from localStorage on load
+(function(){
+  const savedKey=lsGet('c360_apikey');
+  if(savedKey)API_KEY=savedKey;
+  const savedHistory=lsGet('c360_history');
+  if(savedHistory)try{conversationHistory=JSON.parse(savedHistory)}catch(e){}
+  document.addEventListener('DOMContentLoaded',function(){
+    if(savedKey){document.getElementById('apiKeyInput').value=savedKey;var b=document.getElementById('btnSave');b.textContent='✓';b.classList.add('saved')}
+    var wasExpanded=lsGet('c360_expanded');
+    if(wasExpanded==='true')expandChat();
+    var savedMessages=lsGet('c360_messages');
+    if(savedMessages){
+      try{var msgs=JSON.parse(savedMessages);
+      if(msgs.length>0){var sb=document.getElementById('suggestionsBlock');if(sb)sb.remove();msgs.forEach(function(m){addMessage(m.role,m.text)})}}catch(e){}
+    }
+    // Backup click handler for collapsed view (in case onclick attribute is stripped)
+    var cv=document.getElementById('collapsedView');
+    if(cv)cv.addEventListener('click',expandChat);
+  });
+})();
+
+function saveState(){
+  lsSet('c360_history',JSON.stringify(conversationHistory.slice(-20)));
+  var msgs=[];document.querySelectorAll('.msg').forEach(function(m){
+    var role=m.classList.contains('user')?'user':'ai';
+    var body=m.querySelector('.msg-body');if(body)msgs.push({role:role,text:body.innerHTML.replace(/<strong>(.*?)<\/strong>/g,'**$1**').replace(/<code>(.*?)<\/code>/g,'`$1`').replace(/<br\s*\/?>/g,'\n')});
+  });
+  lsSet('c360_messages',JSON.stringify(msgs.slice(-40)));
+}
+
+function expandChat(){
+  document.getElementById('collapsedView').classList.add('hidden');
+  document.getElementById('expandedView').classList.add('active');
+  lsSet('c360_expanded','true');
+}
+function collapseChat(){
+  document.getElementById('expandedView').classList.remove('active');
+  document.getElementById('collapsedView').classList.remove('hidden');
+  lsSet('c360_expanded','false');
+}
+
+const CUSTOMER_DATA = [
+["Unknown","Unknown","Construction","Unknown",89.72,101.43,[12.79,6.4,5.09,7.65,6.66,6.96,8.74,7.43,6.4,7.26,7.24,7.09,7.55,7.64,7.91,8.24,8.46,8.62,8.85,8.94,8.76,8.91,8.78,8.77],null],
+["Unknown","Unknown","Beauty & Wellness","Unknown",74.31,85.89,[5.81,5.54,5.76,5.68,6.36,6.54,6.89,6.78,6.06,6.24,5.96,6.71,6.58,6.14,6.34,6.44,7.29,7.94,8.15,7.69,7.18,7.32,6.97,7.85],null],
+["Region Hovedstaden","Account-117061","Payroll, Rostering & Finance","DK",39.56,41.3,[3.06,2.74,3.22,3.22,3.22,3.24,3.23,3.22,3.22,3.35,3.34,4.49,3.8,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.41,3.42,3.48],{"t":16085,"c":15668,"o":54,"a":303,"b":"Silkeborg Data"}],
+["Unknown","Unknown","Global Delivery","Unknown",0,-74.31,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-6.21,-68.09],null],
+["Coop Norge Sa","Account-080605","Retail & Supply Chain","NO",29.83,31.9,[2.48,2.48,2.48,2.46,2.48,2.48,2.51,2.48,2.48,2.51,2.49,2.49,2.62,2.57,2.65,2.66,2.65,2.65,2.69,2.69,2.69,2.7,2.65,2.68],{"t":2685,"c":2682,"o":0,"a":80,"b":"EG Retail & Wholesale + EG Retail"}],
+["Region Syddanmark","Account-107749","Payroll, Rostering & Finance","DK",24.96,25.62,[2.12,2.06,2.08,2.08,2.07,2.08,2.08,2.08,2.07,2.09,2.07,2.09,2.12,2.12,2.12,2.12,2.15,2.13,2.12,2.12,2.15,2.16,2.15,2.16],{"t":5494,"c":5354,"o":25,"a":105,"b":"Silkeborg Data + Digital Welfare"}],
+["Unknown","Unknown","Utility","Unknown",29.15,19.68,[2.63,2.94,2.72,2.99,2.89,2.86,2.94,2.88,1.76,1.39,1.45,1.7,1.49,1.58,1.63,1.63,2,1.7,1.62,1.63,1.62,1.61,1.58,1.57],null],
+["Unknown","Unknown","Healthcare","Unknown",45.1,-1.58,[4.04,3.07,4.4,3.53,3.72,4.35,3.9,3.44,5.23,3.93,4.24,1.25,0.64,0.44,-0.27,-0.33,0.19,0.19,-0.01,0.11,0.21,-1.93,-0.68,-0.15],null],
+["Mestergruppen Regnskap og IT AS","Account-146079","Retail & Supply Chain","NO",22.23,22.76,[1.8,1.9,1.85,1.84,1.85,1.85,1.85,1.84,1.86,1.87,1.87,1.87,1.84,1.84,1.85,1.91,1.88,1.87,1.87,1.87,1.86,1.88,2.09,2],{"t":7828,"c":7473,"o":36,"a":276,"b":"EG Retail + EG Nexstep + Building Supply"}],
+["Region Midtjylland","Account-108059","Payroll, Rostering & Finance","DK",17.83,18.28,[1.53,1.43,1.47,1.47,1.47,1.51,1.48,1.49,1.47,1.53,1.48,1.5,1.52,1.51,1.54,1.51,1.52,1.51,1.52,1.52,1.52,1.52,1.53,1.58],{"t":1850,"c":1793,"o":8,"a":35,"b":"Silkeborg Data"}],
+["Ejerkredsen Øs Indsigt","Account-108034","Payroll, Rostering & Finance","DK",6.27,28.21,[0.51,0.51,0.51,0.51,0.51,0.51,0.53,0.53,0.53,0.53,0.53,0.55,0.55,0.55,0.55,2.95,2.95,2.95,2.95,2.95,2.95,2.95,2.95,2.95],{"t":0,"note":"N/A - may be logged under Odense Kommune EG ØS Indsigt (1,393 cases)"}],
+["Unknown","Unknown","Vigilo","Unknown",16.91,16.92,[1.4,1.29,1.37,1.37,1.39,1.4,1.35,1.51,1.44,1.45,1.45,1.47,1.58,1.54,1.51,1.51,1.54,1.51,1.85,1.97,1.94,1.96,0,0],null],
+["Norlys Group A/S","Account-109085","Utility","DK",18.24,8.21,[1.42,1.41,1.84,1.6,1.49,1.49,1.49,1.54,1.5,1.48,1.49,1.49,1.37,0.63,0.63,0.63,0.63,0.62,0.62,0.62,0.62,0.62,0.62,0.62],{"t":0,"note":"N/A - no CS data found"}],
+["Dsv A/S","Account-121348","Retail & Supply Chain","DK",12.7,13.55,[0.99,1.09,1.12,1.12,1.12,1.12,1.12,1.12,0.97,0.97,0.97,0.97,1.17,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13],{"t":0,"note":"N/A"}],
+["Evida Service A/S","Account-108156","Utility","DK",11.4,13.9,[1.1,0.7,0.96,0.96,1,0.95,0.96,0.91,0.99,1.08,1,0.78,1.21,0.93,1.13,0.99,0.91,1.15,0.02,2.53,1.5,1.67,1.14,0.71],{"t":1214,"c":1117,"o":19,"a":24,"b":"EG Utility"}],
+["Region Nordjylland","Account-109344","Payroll, Rostering & Finance","DK",12.26,12.68,[1.03,1,1.04,1.04,1.02,1.02,1.02,1.02,1.02,1.03,1.02,1.02,1.05,1.04,1.05,1.07,1.05,1.05,1.05,1.07,1.06,1.06,1.06,1.06],{"t":9329,"c":9154,"o":23,"a":176,"b":"Silkeborg Data + Digital Welfare"}],
+["Sykehuspartner Hf","Account-149033","Healthcare","NO",1.26,18.47,[0,0,0,0,0,0,0,0,0,0,0,1.26,1.26,1.26,1.26,1.25,1.25,2.5,1.41,1.41,1.52,1.6,1.49,2.26],{"t":0,"note":"N/A"}],
+["XL-BYG A.M.B.A","Account-046276","Retail & Supply Chain","DK",9.3,9.14,[0.64,0.67,0.83,0.85,0.61,0.84,0.82,0.82,1.08,0.54,0.82,0.77,0.82,0.83,0.83,0.81,0.82,0.96,0.46,0.7,0.69,0.69,0.69,0.85],null],
+["Odense Kommune","Account-108661","Payroll, Rostering & Finance","DK",8.59,9.08,[0.72,0.73,0.72,0.72,0.66,0.66,0.72,0.74,0.73,0.72,0.72,0.74,0.75,0.75,0.75,0.75,0.78,0.75,0.75,0.76,0.75,0.77,0.76,0.75],{"t":3556,"c":3494,"o":5,"a":82,"b":"Silkeborg Data + EG ØS Indsigt"}],
+["Texcon AS","Account-140211","Retail & Supply Chain","NO",7.59,8,[0.69,0.62,0.61,0.6,0.61,0.66,0.64,0.63,0.62,0.65,0.62,0.64,0.69,0.63,0.65,0.7,0.63,0.67,0.67,0.67,0.66,0.66,0.66,0.71],null],
+["Maakuntien tilakeskus Oy","Account-152825","Facility Management","FI",7.26,7.99,[0.58,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.66,0.63,0.66,0.66,0.66,0.62,0.68,0.68,0.67,0.68,0.68,0.71],null],
+["Energi Fyn Holding A/S","Account-114896","Utility","DK",7.29,7.67,[0.64,0.6,0.62,0.6,0.59,0.6,0.62,0.61,0.61,0.61,0.61,0.61,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64],{"t":1316,"c":1236,"o":18,"a":25,"b":"EG Utility"}],
+["Sport Holding AS","Account-100994","Retail & Supply Chain","NO",7.35,6.64,[0.61,0.51,0.42,0.59,0.51,0.55,0.5,0.57,0.49,0.76,0.58,1.25,0.7,0.78,0.69,0.12,0.54,0.58,0.47,0.58,0.58,0.57,0.57,0.45],null],
+["Silvan A/S","Account-119920","Retail & Supply Chain","DK",7.65,6.12,[0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.58,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.52,0.46,0.46,0.46,0.46],{"t":1342,"c":1280,"o":0,"a":61,"b":"EG ASPECT4"}],
+["Esbjerg Kommune","Account-107917","Payroll, Rostering & Finance","DK",6.78,6.98,[0.57,0.57,0.57,0.57,0.57,0.57,0.56,0.56,0.56,0.56,0.56,0.56,0.58,0.58,0.58,0.58,0.59,0.58,0.58,0.58,0.58,0.58,0.59,0.58],{"t":4832,"c":4712,"o":9,"a":92,"b":"Silkeborg Data + Digital Welfare"}],
+["ICC_EGSU_in_EGDK","Account-136771","Global Delivery","SE",0,13.41,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5.95,7.46],null],
+["Aalborg Kommune","Account-115883","Payroll, Rostering & Finance","DK",6.33,6.68,[0.54,0.48,0.53,0.53,0.53,0.52,0.53,0.53,0.53,0.54,0.54,0.54,0.56,0.56,0.56,0.55,0.56,0.56,0.56,0.56,0.55,0.56,0.56,0.56],{"t":5783,"c":5597,"o":36,"a":110,"b":"Silkeborg Data + Digital Welfare"}],
+["Kesko Oyj","Account-137419","Energy Management Systems","FI",2.7,9.92,[0.19,0,0.83,0.22,0.23,0.23,0.24,0.23,0.23,0.23,0.26,-0.17,0.8,0.82,0.81,0.83,0.83,0.83,0.83,0.84,0.84,0.84,0.83,0.83],{"t":3313,"c":2244,"o":259,"a":276,"b":"EG EMS"}],
+["Unknown","Unknown","Group Finance","Unknown",0,-12.57,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-12.57,0],null],
+["Freja Transport & Logistics Holding A/S","Account-114506","Retail & Supply Chain","DK",5.02,7.35,[0.37,0.42,0.88,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.39,0.39,0.54,0.62,0.62,0.62,1,0.62,0.62,0.66,0.62,0.62],null],
+["Aktieselskapet Vinmonopolet","Account-078238","Retail & Supply Chain","NO",5.86,6.09,[0.5,0.49,0.49,0.47,0.46,0.49,0.49,0.49,0.49,0.49,0.49,0.49,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51],null],
+["Byggmakker Handel AS","Account-116203","Retail & Supply Chain","NO",7.31,4.37,[0.61,0.61,0.61,0.61,0.61,0.61,0.6,0.61,0.61,0.61,0.61,0.62,0.64,0.64,0.64,0.64,0.65,0.65,0.08,0.1,0.09,0.09,0.09,0.09],{"t":1870,"c":1864,"o":0,"a":85,"b":"EG Nexstep"}],
+["Stark IT A/S","Account-147021","Retail & Supply Chain","DK",3.69,7.89,[0.22,0.22,0.22,1.31,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.13,0.22,0.22,1.11,1.11,1.11,1.11,1.11,1.11],null],
+["Skellefteå Kraftaktiebolag","Account-107378","Utility","SE",5.75,5.77,[0.44,0.44,0.44,0.47,0.49,0.49,0.47,0.48,0.5,0.53,0.53,0.48,0.49,0.48,0.49,0.49,0.49,0.48,0.47,0.46,0.48,0.48,0.48,0.48],{"t":1354,"c":1234,"o":32,"a":27,"b":"EG Utility"}],
+["Randers Kommune","Account-108404","Payroll, Rostering & Finance","DK",5.48,5.79,[0.45,0.45,0.46,0.45,0.46,0.46,0.46,0.46,0.46,0.46,0.46,0.46,0.47,0.47,0.47,0.5,0.48,0.48,0.48,0.48,0.5,0.51,0.49,0.49],{"t":5176,"c":5039,"o":16,"a":98,"b":"Silkeborg Data + Digital Welfare"}],
+["Silkeborg Kommune","Account-108029","Payroll, Rostering & Finance","DK",5.49,5.67,[0.49,0.43,0.46,0.46,0.45,0.46,0.46,0.46,0.46,0.46,0.46,0.46,0.49,0.44,0.47,0.47,0.5,0.47,0.47,0.47,0.47,0.47,0.47,0.48],{"t":3432,"c":3354,"o":11,"a":66,"b":"Silkeborg Data + Digital Welfare"}],
+["Herning Kommune","Account-107775","Payroll, Rostering & Finance","DK",5.34,5.67,[0.47,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.47,0.45,0.46,0.46,0.48,0.46,0.52,0.46,0.46,0.46,0.49,0.47,0.47,0.47],{"t":3260,"c":3195,"o":6,"a":63,"b":"Silkeborg Data"}],
+["Telinet Energi AB","Account-111801","Utility","SE",5.22,5.52,[0.49,0.4,0.44,0.48,0.4,0.43,0.45,0.41,0.42,0.45,0.45,0.41,0.44,0.46,0.47,0.5,0.51,0.46,0.44,0.46,0.44,0.44,0.44,0.45],{"t":1669,"c":1607,"o":12,"a":54,"b":"EG Utility"}],
+["Viborg Kommune","Account-109244","Payroll, Rostering & Finance","DK",5.15,5.43,[0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.45,0.44,0.44,0.47,0.45,0.45,0.45,0.45,0.47,0.45,0.45,0.45],{"t":3599,"c":3510,"o":12,"a":68,"b":"Silkeborg Data"}],
+["Kolding Kommune","Account-109579","Payroll, Rostering & Finance","DK",5.1,5.28,[0.43,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.43,0.43,0.43,0.44,0.44,0.44,0.46,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44],{"t":3901,"c":3809,"o":9,"a":75,"b":"Silkeborg Data + Digital Welfare"}],
+["Københavns Kommune","Account-108077","Digital Welfare","DK",5.37,4.99,[0.51,0.49,0.5,0.46,0.45,0.45,0.45,0.41,0.42,0.42,0.36,0.43,0.37,0.44,0.43,0.37,0.41,0.4,0.41,0.43,0.44,0.44,0.43,0.42],null],
+["Reitan Convenience Norway AS","Account-102812","Retail & Supply Chain","NO",5.61,4.63,[0.51,0.52,0.52,0.46,0.47,0.47,0.48,0.47,0.47,0.48,0.38,0.38,0.41,0.4,0.4,0.38,0.38,0.38,0.39,0.38,0.38,0.38,0.38,0.38],null],
+["Gasnätet Stockholm AB","Account-112583","Utility","SE",4.82,5.11,[0.39,0.39,0.4,0.39,0.39,0.45,0.39,0.41,0.41,0.4,0.4,0.4,0.4,0.42,0.44,0.43,0.42,0.43,0.42,0.43,0.43,0.43,0.43,0.43],null],
+["Helse Vest Ikt AS","Account-173366","Healthcare","NO",0.72,9.07,[0,0,0,0,0,0,0,0,0,0,0,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.97,0.82,0.79],null],
+["Convene AS","Account-173081","Healthcare","NO",5.39,4.27,[0.38,0.33,0.37,0.36,0.36,0.52,0.48,0.49,0.45,0.57,0.55,0.55,0.55,0.47,0.48,0.47,0.01,0.71,0.41,0.71,0.41,-0.26,-0.05,0.35],null],
+["Godel i Sverige AB","Account-107195","Utility","SE",4.42,5.15,[0.3,0.31,0.3,0.38,0.37,0.38,0.39,0.39,0.4,0.4,0.4,0.41,0.41,0.42,0.42,0.43,0.43,0.43,0.43,0.43,0.43,0.44,0.44,0.44],null],
+["Beijer Byggmaterial AB","Account-142848","Retail & Supply Chain","SE",3.46,6.05,[0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.79,0.79,0.79,0.79,0.79],null],
+["Unknown","Unknown","Energy Management Systems","Unknown",9.28,0.13,[-6.29,6.3,-4.05,1.86,1.78,1.78,1.71,1.82,1.82,4.56,-2.58,0.57,0.57,0.39,-0.81,-0.1,0,0.01,0.01,0.12,0.02,0.12,-0.22,0],null],
+["ICC_EGDK_in_EGSU","Account-169906","Global Delivery","DK",0,9.27,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.24,9.03],null],
+["Öob AB","Account-076901","Retail & Supply Chain","SE",4.35,4.92,[0.36,0.35,0.35,0.34,0.34,0.34,0.36,0.38,0.37,0.37,0.39,0.39,0.45,0.42,0.42,0.42,0.42,0.42,0.4,0.35,0.41,0.38,0.43,0.41],null],
+["Senaatti-kiinteistöt","Account-152796","Facility Management","FI",4.21,4.95,[0.31,0.31,0.33,0.35,0.34,0.36,0.36,0.36,0.36,0.37,0.38,0.38,0.38,0.39,0.4,0.4,0.4,0.4,0.4,0.4,0.43,0.45,0.45,0.46],null],
+["Öresundskraft AB","Account-107482","Utility","SE",4.41,4.69,[0.36,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.38,0.4,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.4,0.39,0.39],null],
+["Granngården AB","Account-090312","Retail & Supply Chain","SE",4.41,4.63,[0.38,0.33,0.37,0.36,0.37,0.37,0.38,0.37,0.37,0.37,0.37,0.37,0.4,0.39,0.39,0.39,0.39,0.39,0.38,0.38,0.38,0.38,0.38,0.38],null],
+["Frederiksberg Kommune","Account-108280","Payroll, Rostering & Finance","DK",4.47,4.55,[0.36,0.38,0.38,0.38,0.37,0.37,0.37,0.36,0.37,0.37,0.37,0.38,0.37,0.37,0.37,0.4,0.4,0.38,0.37,0.37,0.38,0.38,0.38,0.38],{"t":2824,"c":2702,"o":23,"a":54,"b":"Silkeborg Data + Digital Welfare"}],
+["Arbejdsmarkedets Tillægspension","Account-109738","Digital Welfare","DK",4.22,4.62,[0.31,0.31,0.36,0.36,0.36,0.36,0.35,0.47,0.25,0.36,0.36,0.36,0.36,0.36,0.37,0.42,0.38,0.38,0.38,0.38,0.39,0.39,0.39,0.41],null],
+["Unknown","Unknown","Legal","Unknown",3.76,4.95,[0.28,0.26,0.3,0.27,0.3,0.27,0.35,0.27,0.33,0.45,0.34,0.34,0.35,0.35,0.35,0.37,0.39,0.4,0.4,0.41,0.43,0.39,0.51,0.58],null],
+["Motonet Oy","Account-120962","Retail & Supply Chain","FI",3.77,4.72,[0.26,0.27,0.27,0.32,0.32,0.32,0.32,0.32,0.38,0.33,0.33,0.33,0.34,0.33,0.33,0.33,0.33,0.33,0.34,0.34,0.44,0.37,0.87,0.36],null],
+["Gladsaxe Kommune","Account-112940","Payroll, Rostering & Finance","DK",4.14,4.31,[0.35,0.35,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.35,0.35,0.35,0.35,0.35,0.36,0.36,0.36,0.36,0.38,0.36,0.36,0.36],{"t":3632,"c":3577,"o":11,"a":76,"b":"Silkeborg Data + EG ØS Indsigt"}],
+["Vantaan kaupunki","Account-152874","Facility Management","FI",5.15,3.23,[0.42,0.42,0.42,0.42,0.42,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.26,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25],null],
+["Hjørring Kommune","Account-107977","Payroll, Rostering & Finance","DK",4.07,4.27,[0.33,0.37,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.35,0.35,0.35,0.39,0.31,0.35,0.35,0.35,0.36,0.36,0.39,0.36],{"t":4286,"c":4207,"o":8,"a":91,"b":"Silkeborg Data + EG ØS Indsigt"}],
+["Region Sjælland","Account-109362","Digital Welfare","DK",3.98,4.36,[0.32,0.32,0.32,0.36,0.35,0.34,0.33,0.33,0.34,0.33,0.33,0.33,0.4,0.34,0.34,0.34,0.34,0.34,0.41,0.36,0.36,0.39,0.37,0.37],null],
+["Norlys Digital A/S","Account-174235","Utility","DK",0,8.3,[0,0,0,0,0,0,0,0,0,0,0,0,0,0.74,0.75,0.74,0.75,0.76,0.76,0.76,0.76,0.76,0.76,0.76],null],
+["St1 Nordic Oy","Account-101981","Retail & Supply Chain","FI",3.83,4.41,[0.29,0.29,0.29,0.32,0.3,0.3,0.3,0.34,0.34,0.35,0.35,0.35,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.46,0.36,0.27,0.37],null],
+["Aura A/S","Account-114912","Utility","DK",4.23,3.97,[0.33,0.33,0.33,0.32,0.32,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.29,0.29,0.29,0.29,0.29,0.29],null],
+["Kitchn AS","Account-083108","Retail & Supply Chain","NO",3.53,4.38,[0.3,0.3,0.3,0.27,0.26,0.26,0.3,0.31,0.31,0.31,0.31,0.31,0.33,0.33,0.32,0.32,0.44,0.38,0.38,0.38,0.38,0.37,0.37,0.37],null],
+["Esbjerg Kommune","Account-107917","Digital Welfare","DK",3.75,3.94,[0.28,0.31,0.32,0.32,0.29,0.3,0.31,0.31,0.34,0.32,0.32,0.34,0.32,0.32,0.33,0.33,0.34,0.33,0.33,0.33,0.33,0.33,0.33,0.34],{"t":4832,"c":4712,"o":9,"a":92,"b":"Silkeborg Data + Digital Welfare"}],
+["Kentaur A/S","Account-108090","Retail & Supply Chain","DK",3.42,3.98,[0.28,0.47,0.31,0.3,0.36,0.16,0.17,0.25,0.25,0.32,0.44,0.12,0.28,0.32,0.26,0.64,0.33,0.37,0.28,0.3,0.34,0.3,0.28,0.28],null],
+["Haderslev Kommune","Account-107963","Payroll, Rostering & Finance","DK",3.6,3.8,[0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.32,0.31,0.35,0.33,0.31,0.31,0.31,0.31,0.32,0.31,0.31,0.31,0.31],{"t":1531,"c":1494,"o":2,"a":29,"b":"Silkeborg Data"}],
+["Region Syddanmark","Account-107749","Healthcare","DK",3.61,3.75,[0.27,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.31,0.31,0.31,0.31,0.31,0.31,0.31,0.31,0.31,0.29,0.36,0.31,0.31],{"t":5494,"c":5354,"o":25,"a":105,"b":"Silkeborg Data + Digital Welfare"}],
+["Mälarenergi AB","Account-107715","Utility","SE",3.49,3.83,[0.31,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.3,0.4,0.31,0.31,0.32,0.31,0.31,0.31,0.32,0.3,0.32,0.32],null],
+["Ballerup Kommune","Account-108084","Payroll, Rostering & Finance","DK",3.55,3.73,[0.29,0.3,0.29,0.29,0.29,0.29,0.29,0.29,0.31,0.3,0.3,0.3,0.3,0.35,0.31,0.31,0.31,0.31,0.28,0.31,0.31,0.31,0.31,0.31],{"t":1961,"c":1924,"o":4,"a":38,"b":"Silkeborg Data"}],
+["Eko-Gruppen Hässleholm AB","Account-097330","Retail & Supply Chain","SE",3.04,3.93,[0.24,0.24,0.24,0.24,0.21,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.29,0.29,0.3,0.31,0.32,0.32,0.32,0.35,0.35,0.39,0.35,0.35],null],
+["Kesko Oyj","Account-137419","Retail & Supply Chain","FI",0,6.95,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.15,1.17,1.14,1.15,1.17,1.17],{"t":3313,"c":2244,"o":259,"a":276,"b":"EG EMS"}],
+["Silkeborg Kommune","Account-108029","Digital Welfare","DK",3.26,3.63,[0.25,0.26,0.28,0.28,0.28,0.27,0.28,0.28,0.28,0.28,0.27,0.27,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.33,0.31,0.31],{"t":3432,"c":3354,"o":11,"a":66,"b":"Silkeborg Data + Digital Welfare"}],
+["Skive Kommune","Account-117037","Payroll, Rostering & Finance","DK",3.32,3.54,[0.28,0.28,0.28,0.28,0.28,0.27,0.29,0.27,0.27,0.27,0.27,0.27,0.29,0.27,0.29,0.29,0.29,0.32,0.3,0.3,0.3,0.3,0.3,0.3],{"t":2353,"c":2296,"o":12,"a":45,"b":"Silkeborg Data"}],
+["Fujitsu A/S I Likvidation","Account-107301","Payroll, Rostering & Finance","DK",4.45,2.34,[0.36,0.36,0.36,0.36,0.36,0.36,0.37,0.37,0.37,0.42,0.41,0.38,0.38,0.38,0.38,0.41,0.4,0.39,0.39,-0.4,0,0,0,0],null],
+["Faaborg-Midtfyn Kommune","Account-109501","Payroll, Rostering & Finance","DK",3.25,3.31,[0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28],{"t":1793,"c":1764,"o":1,"a":34,"b":"Silkeborg Data"}],
+["Kolding Kommune","Account-109579","Digital Welfare","DK",3.26,3.3,[0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.31,0.31,0.3,0.27,0.27,0.27,0.28,0.27,0.27,0.27,0.27,0.27,0.29,0.29,0.27],{"t":3901,"c":3809,"o":9,"a":75,"b":"Silkeborg Data + Digital Welfare"}],
+["Frederiksberg Kommune","Account-108280","Digital Welfare","DK",3.33,3.09,[0.26,0.26,0.26,0.26,0.28,0.28,0.28,0.3,0.28,0.28,0.28,0.32,0.07,0.26,0.26,0.26,0.26,0.26,0.27,0.26,0.26,0.27,0.26,0.4],{"t":2824,"c":2702,"o":23,"a":54,"b":"Silkeborg Data + Digital Welfare"}],
+["Tiger AS","Account-080624","Retail & Supply Chain","NO",3.06,3.34,[0.28,0.29,0.29,0.19,0.19,0.24,0.27,0.23,0.27,0.27,0.27,0.27,0.29,0.28,0.28,0.28,0.28,0.28,0.29,0.27,0.27,0.27,0.28,0.27],null],
+["Holstebro Kommune","Account-107986","Payroll, Rostering & Finance","DK",3.09,3.23,[0.27,0.25,0.25,0.25,0.27,0.25,0.25,0.25,0.25,0.28,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.33],{"t":4562,"c":4470,"o":21,"a":97,"b":"Silkeborg Data + EG ØS Indsigt"}],
+["Region Nordjylland","Account-109344","Digital Welfare","DK",3.06,3.09,[0.22,0.26,0.25,0.27,0.27,0.27,0.25,0.24,0.25,0.25,0.25,0.3,0.25,0.25,0.25,0.25,0.28,0.25,0.26,0.25,0.26,0.25,0.27,0.27],{"t":9329,"c":9154,"o":23,"a":176,"b":"Silkeborg Data + Digital Welfare"}],
+["Aarhus Kommune","Account-108206","Digital Welfare","DK",3.15,2.96,[0.32,0.33,0.24,0.25,0.26,0.25,0.26,0.26,0.24,0.25,0.25,0.24,0.26,0.22,0.21,0.31,0.26,0.24,0.24,0.25,0.25,0.25,0.24,0.24],null],
+["Davidsen A/S","Account-108273","Retail & Supply Chain","DK",4.49,1.54,[0.34,0.34,0.33,0.33,0.33,0.33,0.33,0.33,0.33,0.33,0.57,0.57,0.59,0.59,0.36,0,0,0,0,0,0,0,0,0],null],
+["Aalborg Service A/S","Account-126700","Utility","DK",2.97,3.05,[0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.26,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25],null],
+["Energi Viborg A/S","Account-108121","Utility","DK",2.66,3.35,[0.21,0.21,0.21,0.21,0.22,0.22,0.21,0.22,0.25,0.23,0.23,0.24,0.29,0.32,0.3,0.28,0.27,0.28,0.27,0.27,0.26,0.26,0.26,0.27],null],
+["Ewii A/S","Account-108329","Utility","DK",2.76,3.22,[0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],null],
+["Ikast-Brande Kommune","Account-109277","Payroll, Rostering & Finance","DK",3.06,2.9,[0.31,0.28,0.27,0.24,0.24,0.24,0.25,0.26,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24],{"t":1492,"c":1445,"o":5,"a":28,"b":"Silkeborg Data"}],
+["Intersport AB","Account-076895","Retail & Supply Chain","SE",2.83,3.05,[0.24,0.24,0.24,0.23,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.26,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.24,0.24,0.33],null],
+["Syddjurs Kommune","Account-109314","Payroll, Rostering & Finance","DK",2.85,2.95,[0.23,0.27,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.27,0.23,0.24,0.24,0.24,0.24,0.28,0.24,0.24,0.24,0.24,0.24,0.25,0.24],{"t":4633,"c":4557,"o":12,"a":99,"b":"Silkeborg Data + EG ØS Indsigt + Digital Welfare"}],
+["Ok-Fonden","Account-116058","Payroll, Rostering & Finance","DK",2.86,2.87,[0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.23,0.24,0.24,0.25,0.25,0.25,0.25,0.23,0.23,0.23,0.23,0.23,0.23,0.25,0.23],{"t":1037,"c":997,"o":5,"a":20,"b":"Silkeborg Data"}],
+["KK Group Cooling A/S","Account-136786","Retail & Supply Chain","DK",2.61,3.07,[0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.22,0.22,0.33,0.32,0.32,0.29],null],
+["Kemp & Lauritzen A/S","Account-136797","Construction","DK",2.6,2.74,[0.21,0.21,0.21,0.21,0.21,0.21,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23],{"t":704,"c":662,"o":3,"a":16,"b":"EG Construction"}],
+["Region Midtjylland - Psykiatristaben","Account-116902","Digital Welfare","DK",2.63,2.57,[0.23,0.22,0.22,0.22,0.22,0.22,0.22,0.21,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.21,0.21,0.21,0.21,0.21,0.21],null],
+["Boligkontoret Danmark","Account-114661","Housing","DK",2.54,2.64,[0.25,0.2,0.2,0.23,0.2,0.2,0.22,0.2,0.2,0.22,0.21,0.23,0.23,0.21,0.2,0.23,0.22,0.21,0.24,0.23,0.21,0.22,0.22,0.22],null],
+["Skovbo Data ApS","Account-117298","Brandsoft","DK",2.67,2.47,[0.22,0.22,0.22,0.22,0.22,0.23,0.22,0.22,0.23,0.23,0.23,0.22,0.2,0.2,0.2,0.2,0.2,0.21,0.22,0.21,0.21,0.21,0.21,0.19],{"t":996,"c":978,"o":0,"a":19,"b":"EG Brandsoft"}],
+["Unknown","Unknown","Groupcare","Unknown",1.67,2.36,[0.14,0.09,-0.01,0.09,0.09,0,0.17,0.26,0.15,0.23,0.23,0.23,0.21,0.21,0.21,0.21,0.21,0.19,0.19,0.19,0.19,0.19,0.19,0.19],null],
+["Unknown","Unknown","Facility Management","Unknown",0.34,3.18,[0.05,0.05,0.03,0.14,0,-0.01,0.02,0.01,-0.03,0.05,0,0.02,-0.2,0.33,0.38,0.27,0.29,0.25,0.26,0.33,0.42,0.3,0.26,0.28],null],
+["Unknown","Unknown","Quality & Asset Management","Unknown",1.77,1,[0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.08,0.08,0.08,0.08,0.08,0.08,0,0.16,0.11,0.08,0.08,0.08],null],
+["Unknown","Unknown","Retail & Supply Chain","Unknown",-0.95,-1.08,[0.12,-0.35,-0.78,-0.82,0.29,0.3,0.32,0.02,0,0,0.03,-0.07,-0.08,0.03,-0.8,-0.23,0,0,-0.01,0,0,-0.01,0,0],null]
+];
+
+
+function findCustomerData(query) {
+  const q = query.toLowerCase().normalize('NFC');
+  const matches = CUSTOMER_DATA.filter(c => {
+    const name = c[0].toLowerCase().normalize('NFC');
+    const code = c[1].toLowerCase();
+    if (name.length > 3 && q.includes(name)) return true;
+    if (code.length > 3 && q.includes(code)) return true;
+    const nameWords = name.split(/[\s,]+/).filter(w => w.length > 3);
+    const matchCount = nameWords.filter(w => q.includes(w)).length;
+    if (nameWords.length > 0 && matchCount >= Math.ceil(nameWords.length * 0.5)) return true;
+    return false;
+  });
+  if (matches.length === 0) return '';
+  const months = ['Jan24','Feb24','Mar24','Apr24','May24','Jun24','Jul24','Aug24','Sep24','Oct24','Nov24','Dec24','Jan25','Feb25','Mar25','Apr25','May25','Jun25','Jul25','Aug25','Sep25','Oct25','Nov25','Dec25'];
+  let ctx = '\n\n## CUSTOMER 360 DATA (matched from embedded data)\n';
+  ctx += 'Below is the COMPLETE view across all models for this customer. Use ALL of this data to answer.\n';
+  matches.slice(0, 10).forEach(c => {
+    ctx += `\n### ${c[0]} (${c[1]}) | BU: ${c[2]} | Country: ${c[3]}\n`;
+    ctx += `\n**SUBSCRIPTION REVENUE (SB Model):**\n`;
+    ctx += `2024 Total: ${c[4]}M DKK | 2025 Total: ${c[5]}M DKK`;
+    if(c[4]!==0) ctx += ` | YoY: ${((c[5]-c[4])/Math.abs(c[4])*100).toFixed(1)}%`;
+    ctx += `\nMonthly 2024: `;
+    for(let i=0;i<12;i++) ctx += `${months[i]}:${c[6][i]} `;
+    ctx += `\nMonthly 2025: `;
+    for(let i=12;i<24;i++) ctx += `${months[i]}:${c[6][i]} `;
+    ctx += '\n';
+    
+    // CS data (index 7)
+    const cs = c[7];
+    ctx += `\n**CUSTOMER SERVICE (CS Model):**\n`;
+    if(cs && cs.t > 0) {
+      ctx += `Total Cases: ${cs.t.toLocaleString()} | Closed: ${cs.c.toLocaleString()} | Open: ${cs.o} | Avg/Month: ${cs.a}\n`;
+      ctx += `Close Rate: ${(cs.c/cs.t*100).toFixed(1)}% | CS BU: ${cs.b}\n`;
+    } else if(cs && cs.note) {
+      ctx += `${cs.note}\n`;
+    } else {
+      ctx += `No per-customer CS case data available. Check BU-level case data above.\n`;
+    }
+    
+    // SR note
+    ctx += `\n**SALES PIPELINE (SR Model):**\n`;
+    ctx += `Per-customer pipeline data is tracked at BU level. Refer to the SR pipeline section above for ${c[2]} BU pipeline.\n`;
+  });
+  return ctx;
+}
+
+
+const DASHBOARD_CONTEXT=`You are the AI assistant for the **Customer 360** dashboard at EG A/S. You have embedded data from 3 composite models: Subscription Business (SB), Customer Service (CS), and Sales Revenue (SR).
+
+IMPORTANT RULES:
+- Be concise — this is a narrow chat panel inside Power BI.
+- Use **bold** for emphasis. Keep answers SHORT but data-rich.
+- Never invent data. Only use what's provided below.
+- Format numbers with thousand separators and appropriate units (M for millions, K for thousands).
+- When comparing periods, show % change.
+- Reference the model (SB/CS/SR) when relevant.
+
+DATA LIMITATIONS — BE HONEST:
+- SB data uses raw DKK BR (billing revenue) from the fact table, NOT the computed MRR/KPI measures shown on the dashboard.
+- The dashboard's Snowball KPIs (MRR, ARR Growth%, NRR%, GRR%, Churn) use EXTERNALMEASURE via DirectQuery to an upstream model — these exact values are NOT embedded here.
+- CS data: total case counts are embedded for ~41 customers. Monthly case breakdowns are BU-level only.
+- SR data: pipeline is at BU+Stage level only, not per customer.
+- If asked about MRR, Churn Rate, NRR, GRR, or other KPI measures specifically, explain that these are computed by the upstream Snowball model and the chatbot has raw billing revenue instead. You can show revenue trends as a proxy.
+
+═══════════════════════════════════════════
+MODEL 1: SUBSCRIPTION BUSINESS (SB)
+═══════════════════════════════════════════
+
+## SCHEMA
+Tables: SB_FactCustomer (fact), SB_DimDate, SB_DimOrgStructure, SB_LTM, SB_LTM date, SB___MeasureCustomer
+Key columns: Period, BU, Account Code, Account Name, Account Country, OrgStructure, DKK BR (revenue), Main Product Name, Type, Account Chain
+
+## DIVISION → BU HIERARCHY
+**Construction, Property & Infrastructure Division:**
+  - Construction: 1,551M DKK BR | 21,110 customers
+  - Energy Management Systems: 350M | 5,126 customers
+  - Facility Management: 339M | 587 customers
+  - Housing: 325M | 1,254 customers
+  - Quality & Asset Management: 341M | 1,329 customers
+  - Utility: 619M | 180 customers
+
+**Healthcare & Citizen Welfare Division:**
+  - Payroll, Rostering & Finance: 876M | 269 customers
+  - Digital Welfare: 632M | 935 customers
+  - Healthcare: 1,052M | 9,089 customers
+  - Beauty & Wellness: 378M | 3,409 customers
+  - Brandsoft: 141M | 1,827 customers
+  - Groupcare: 68M | 146 customers
+  - Legal: 95M | 228 customers
+  - Vigilo: 62M | 93 customers
+
+**Retail & Supply Chain Division:**
+  - Retail & Supply Chain: 1,213M | 1,741 customers
+
+**Group Functions Division:**
+  - CloudOps, Global Delivery, Group Finance, Group Management, etc. (minimal revenue)
+
+## MONTHLY REVENUE BY BU (DKK BR in millions, Jan 2024 – Apr 2026)
+Construction: Jan24=37.0|Feb24=37.3|Mar24=35.8|Apr24=36.8|May24=37.6|Jun24=37.5|Jul24=38.0|Aug24=38.2|Sep24=38.2|Oct24=39.1|Nov24=38.2|Dec24=38.7|Jan25=39.0|Feb25=39.1|Mar25=39.4|Apr25=40.1|May25=40.8|Jun25=41.1|Jul25=40.9|Aug25=40.8|Sep25=40.9|Oct25=41.3|Nov25=40.7|Dec25=41.5|Jan26=41.0|Feb26=41.3|Mar26=41.8|Apr26=34.4
+Energy Mgmt Systems: Jan24=9.0|Feb24=8.8|Mar24=7.2|Apr24=8.5|May24=8.5|Jun24=8.4|Jul24=8.5|Aug24=8.5|Sep24=8.4|Oct24=8.9|Nov24=9.1|Dec24=8.6|Jan25=8.7|Feb25=8.9|Mar25=9.8|Apr25=9.2|May25=9.3|Jun25=9.1|Jul25=9.2|Aug25=9.1|Sep25=9.0|Oct25=9.4|Nov25=9.8|Dec25=9.0|Jan26=8.0|Feb26=8.9|Mar26=8.8|Apr26=8.7
+Healthcare: Jan24=15.3 (est from dimAccount)|Feb24-Dec25 series from live data
+Beauty & Wellness: Jan24=8.8|Feb24=8.1|Mar24=9.1|Apr24=8.9|May24=9.3|Jun24=9.9|Jul24=9.6|Aug24=9.8|Sep24=9.0|Oct24=9.2|Nov24=8.9|Dec24=9.6|Jan25=9.5|Feb25=9.2|Mar25=9.2|Apr25=9.3|May25=10.1|Jun25=10.9|Jul25=11.1|Aug25=10.6|Sep25=10.1|Oct25=10.2|Nov25=9.7|Dec25=10.5|Jan26=9.9|Feb26=9.8|Mar26=10.3
+Brandsoft: Jan24=3.7|Feb24=3.3|Mar24=3.3|Apr24=3.3|May24=3.3|Jun24=3.6|Jul24=3.3|Aug24=3.4|Sep24=3.4|Oct24=3.4|Nov24=3.4|Dec24=3.5|Jan25=3.9|Feb25=3.6|Mar25=3.6|Apr25=3.7|May25=3.7|Jun25=3.7|Jul25=3.9|Aug25=3.7|Sep25=3.7|Oct25=3.7|Nov25=3.7|Dec25=4.4|Jan26=4.1|Feb26=4.1|Mar26=4.0
+Digital Welfare: Jan24=15.3|Feb24=15.0|Mar24=15.7|Apr24=15.3|May24=15.5|Jun24=15.3|Jul24=15.1|Aug24=15.4|Sep24=15.3|Oct24=15.8|Nov24=15.6|Dec24=15.9|Jan25=15.7|Feb25=15.5|Mar25=16.2|Apr25=16.3|May25=16.2|Jun25=15.9|Jul25=15.9|Aug25=16.3|Sep25=15.9|Oct25=16.2|Nov25=16.2|Dec25=16.8|Jan26=16.7|Feb26=17.1|Mar26=17.2
+Facility Management: Jan24=8.0|Feb24=7.8|Mar24=8.0|Apr24=8.0|May24=8.0|Jun24=8.1|Jul24=8.0|Aug24=8.0|Sep24=8.1|Oct24=8.0|Nov24=8.2|Dec24=8.9|Jan25=8.3|Feb25=8.1|Mar25=8.2|Apr25=8.4|May25=8.1|Jun25=8.3|Jul25=8.4|Aug25=8.3|Sep25=8.4|Oct25=8.4|Nov25=8.1|Dec25=8.2|Jan26=8.7|Feb26=8.1|Mar26=8.5
+Retail & Supply Chain: Revenue ~1,213M total across period
+Utility: Revenue ~619M total
+Housing: Revenue ~325M total
+Quality & Asset Mgmt: Revenue ~341M total
+Payroll, Rostering & Finance: Revenue ~876M total
+Groupcare: Revenue ~68M total
+Legal: Revenue ~95M total
+Vigilo: Revenue ~62M total
+
+## ACCOUNTS BY COUNTRY (SB)
+NO: largest (~9,846 in Construction alone) | DK: second (~4,943 Construction) | PL: 5,131 Construction | FI: 3,311 EMS + 706 Construction | SE: moderate across BUs | IS, US, GB, GL, FO: smaller
+
+## SB MEASURES (47 total — key ones)
+KPI Measures: SB_IFRS Opening, SB_Consumption Opening, SB_Churn, SB_Upsell, SB_Downsell, SB_Other, SB_Opening MRR adj, SB_Closing MRR adj, SB_NRR_test, SB_Growth_test, SB_GRR_test, SB_MRR
+Base Values: SB_Customer_Main_Upsell/Churn/Downsell/Other, SB_Customer_Chain_Upsell/Churn/Downsell/Other
+Totals: SB_Churn_total, SB_Upsell_total, SB_Downsell_total, SB_Other_total, SB_Sum Total
+
+═══════════════════════════════════════════
+MODEL 2: CUSTOMER SERVICE (CS)
+═══════════════════════════════════════════
+
+## SCHEMA
+Tables: CS_datamart factService (fact), CS_datamart factServiceSnapshot, CS_datamart dimTime, CS_datamart dimAccount, CS_datamart viewOrganization, CS_Calculations, CS_13MonthBackDate, CS_Time Periods
+Key columns: CaseNumber, CaseType (Question/Incident/Access/Application feature), ServiceBusinessUnit, Status (New/Open/Closed/Cancelled/Resolved/Queued), CombinedPriority, ContactChannel, YYYYMM, Account_GlobalKey, SalesItemName, MainProductCode
+
+## CS MEASURES
+CS_Cases, CS_Closed Cases1, CS_Backlog - Monthly Reporting, FiltersApplied_Cases, AccountFilter
+
+## CS CASE DATA BY BU (Top BUs with significant volume)
+**EG Healthcare** — largest case volume:
+  2023: Jan=6,853|Feb=6,434|Mar=7,165|Apr=6,770|May=7,327|Jun=6,953|Jul=6,846|Aug=6,891|Sep=6,611|Oct=7,033|Nov=6,651|Dec=6,449
+  2024: Jan=6,754|Feb=6,488|Mar=7,117|Apr=6,740|May=7,018|Jun=6,552|Jul=6,655|Aug=6,622|Sep=6,685|Oct=7,223|Nov=6,509|Dec=6,282
+  2025: Jan=6,557|Feb=6,213|Mar=6,730|Apr=6,492 (and declining)
+  Most are CaseType=Question, Status=Closed
+
+**EG Construction** — second largest:
+  2023: ~2,000-3,000/month | 2024: ~2,500-3,500/month | 2025: ~2,800-3,200/month
+
+**CloudOps** — infrastructure support:
+  2022: 2,000-3,000/month | 2023: declining to ~200-300/month | 2024: ~60-120/month | 2025: ~40-60/month
+
+**EG Digital Welfare**: ~600-1,000/month
+**EG Beauty & Wellness**: ~400-800/month
+**EG Brandsoft**: ~200-500/month
+**Facility Management**: ~200-400/month
+
+## CASE STATUS DISTRIBUTION (overall)
+Closed: majority (~70-80%) | Cancelled: significant (~15-20%) | New/Open: small active backlog | Resolved: rare
+
+═══════════════════════════════════════════
+MODEL 3: SALES REVENUE / PIPELINE (SR)
+═══════════════════════════════════════════
+
+## SCHEMA
+Tables: SR_factOpportunity (fact), SR_datamart dimAccount, SR_datamart viewOrganization, SR_datamart dimTime, SR_Calculations
+Key columns: OpportunityId, OpportunityLineId, MDM Business Unit, Opportunity Stage, ARR, ARR - Weighted, ARR - Currency Adj., ARR Weighted - Currency Adj., Opportunity Type, Account Name, Opportunity Owner, Pipeline, CurrencyIsoCode
+
+## SR MEASURES
+SR_Base - Weighted - New, SR_Monthly Report - Left-to-go, SR_Monthly Report - Target MTH, SR_Monthly Report Closed Won, SR_closed won - except month, SR_target for closed won
+
+## PIPELINE BY BU & STAGE (ARR - Currency Adj. in DKK)
+**Construction** (largest pipeline):
+  Closed Won: 146.1M (34,114 deals)
+  Closed Lost: 32.2M (2,808)
+  Close Lost: 7.0M (850)
+  Needs Analysis: 12.1M (777)
+  Qualification: 11.4M (303)
+  Proposal: 5.9M (154)
+  Stage 0: 4.3M (37)
+  Negotiation: 1.2M (67)
+
+**Retail & Supply Chain:**
+  Closed Won: 59.1M (744 deals)
+  Closed Lost: 76.1M (119)
+  Qualification: 84.4M (57)
+  Needs Analysis: 26.7M (53)
+  Proposal: 18.5M (82)
+
+**Healthcare:**
+  Closed Won: 58.8M (7,704)
+  Closed Lost: 17.9M (1,086)
+  Proposal: 2.9M (92)
+  Needs Analysis: 2.2M (70)
+
+**Quality & Asset Management:**
+  Closed Won: 38.7M (1,081)
+  Closed Lost: 52.7M (129)
+  Demonstration/Trial: 19.0M (120)
+  Qualification: 16.9M (120)
+  Needs Analysis: 18.2M (60)
+  Proposal: 11.9M (93)
+
+**Utility:**
+  Closed Won: 41.3M (342)
+  Closed Lost: 49.0M (136)
+  Qualification: 50.2M (154)
+
+**Beauty & Wellness:**
+  Closed Won: 29.0M (3,436)
+  Open: 0.9M (1)
+
+**Energy Management Systems:**
+  Closed Won: 27.6M (5,676)
+  Closed Lost: 28.6M (596)
+  Qualification: 22.8M (250)
+  Needs Analysis: 16.0M (325)
+  Frame Signed: 2.6M (470)
+
+**Facility Management:**
+  Closed Won: 20.7M (740)
+  Closed Lost: 22.8M (256)
+  Qualification: 15.4M (170)
+
+**Digital Welfare:**
+  Closed Won: 19.5M (857)
+  Closed Lost: 15.6M (397)
+  Qualification: 7.8M (186)
+
+**Payroll, Rostering & Finance:**
+  Closed Won: 20.3M (316)
+  Closed Lost: 14.7M (96)
+  Qualification: 155.4M (40) — very large deals
+
+**Housing:**
+  Closed Won: 15.1M (1,774)
+  Qualification: 8.0M (404)
+
+**Brandsoft:**
+  Closed Won: 5.4M (1,643)
+  Needs Analysis: 2.6M (566)
+
+**Groupcare:**
+  Closed Won: 5.1M (140)
+  Closed Lost: 13.7M (176)
+
+## OPPORTUNITY STAGES (Pipeline flow)
+Stage 0 → Qualification → Needs Analysis → Proposal → Demonstration/Trial → Negotiation → Frame Signed → Customer Onboarding → Closed Won / Closed Lost
+
+## WIN RATE INSIGHTS
+High win rate: Construction, Healthcare, Beauty & Wellness
+Low win rate: Quality & Asset Mgmt (high lost), Groupcare (high lost), Utility (high lost)
+Massive pipeline: Payroll Rostering & Finance has 155M in Qualification
+
+═══════════════════════════════════════════
+CROSS-MODEL RELATIONSHIPS
+═══════════════════════════════════════════
+- CM_Dim_Account links across models via Account_GlobalKey
+- CM_Dim_Organization links via OrgStructure/OrganizationStructure_GlobalKey
+- CM_Dim_Time provides shared date dimension
+- All 3 models share the same Division→BU hierarchy
+
+Keep answers concise. Never invent data. Reference the model when relevant.
+
+IMPORTANT — CUSTOMER 360 CAPABILITY:
+You have per-customer data from ALL 3 models for the top 100 customers:
+- **SB (Subscription)**: 24-month revenue (Jan 2024 – Dec 2025), yearly totals, BU, country
+- **CS (Customer Service)**: Total cases, closed cases, open cases, avg cases/month, close rate
+- **SR (Sales Pipeline)**: Pipeline is at BU level — reference the SR pipeline section when asked
+
+When a user asks about a specific customer, their FULL 360 data is automatically injected.
+ALWAYS answer using ALL available data across models — don't say "I don't have CS data" if it's provided.
+If CS data shows null or 0 cases, say "No direct case records found for this customer" and suggest checking the BU.
+Format monthly data as clean tables. Calculate MoM growth, YoY changes, identify trends.
+Note: Some customers appear in multiple BUs (e.g. Region Nordjylland has Payroll + Digital Welfare + Healthcare).
+`;
+
+document.addEventListener('copy',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['c','a','u','s'].includes(e.key.toLowerCase()))e.preventDefault()});
+
+function saveApiKey(){const v=document.getElementById('apiKeyInput').value.trim();if(!v)return;API_KEY=v;lsSet('c360_apikey',v);const b=document.getElementById('btnSave');b.textContent='✓';b.classList.add('saved');setTimeout(()=>{b.textContent='Save';b.classList.remove('saved')},2000)}
+function askSuggestion(el){
+  const sb=document.getElementById('suggestionsBlock');if(sb)sb.remove();
+  document.getElementById('userInput').value=el.textContent;sendMessage();
+}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,60)+'px'}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
+function addMessage(role,text){
+  const sb=document.getElementById('suggestionsBlock');if(sb)sb.remove();
+  const chat=document.getElementById('chatArea');const div=document.createElement('div');div.className='msg '+role;const av=document.createElement('div');av.className='msg-avatar';av.textContent=role==='user'?'👤':'EG';const body=document.createElement('div');body.className='msg-body';body.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/\n/g,'<br>');div.appendChild(av);div.appendChild(body);chat.appendChild(div);chat.scrollTop=chat.scrollHeight;
+}
+function addTyping(){const chat=document.getElementById('chatArea');const div=document.createElement('div');div.className='msg ai';div.id='typingMsg';const av=document.createElement('div');av.className='msg-avatar';av.textContent='EG';const body=document.createElement('div');body.className='msg-body';body.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';div.appendChild(av);div.appendChild(body);chat.appendChild(div);chat.scrollTop=chat.scrollHeight}
+function removeTyping(){const el=document.getElementById('typingMsg');if(el)el.remove()}
+async function sendMessage(){
+  const input=document.getElementById('userInput');const text=input.value.trim();
+  if(!text||isLoading)return;
+  if(!API_KEY){addMessage('ai','⚠️ Enter your API key and click **Save** first.');return}
+  isLoading=true;document.getElementById('btnSend').disabled=true;
+  input.value='';input.style.height='auto';
+  addMessage('user',text);addTyping();
+  conversationHistory.push({role:'user',content:text});
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,system:DASHBOARD_CONTEXT+findCustomerData(text),messages:conversationHistory.slice(-20)})
+    });
+    removeTyping();
+    if(!resp.ok){const err=await resp.json().catch(()=>({}));addMessage('ai','❌ '+(err?.error?.message||'Error '+resp.status));conversationHistory.pop()}
+    else{const data=await resp.json();const reply=data.content.map(c=>c.text||'').join('\n').trim();addMessage('ai',reply);conversationHistory.push({role:'assistant',content:reply})}
+    saveState();
+  }catch(err){removeTyping();addMessage('ai','❌ '+err.message);conversationHistory.pop()}
+  isLoading=false;document.getElementById('btnSend').disabled=false;input.focus()
+}
+</script>
+</body>
+</html>
