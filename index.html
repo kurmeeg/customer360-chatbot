@@ -349,8 +349,10 @@ function findCustomerData(query) {
   });
   if (matches.length === 0) return '';
   const mode = window.dataMode || 'both';
-  let ctx = '\n\n## CUSTOMER 360 DATA (matches dashboard numbers, Year filter=2024,2025)\n';
-  ctx += 'Data source: ' + (mode==='kpi'?'KPI Measures (dashboard)':mode==='dwh'?'DWH Raw Tables':' Both DWH + KPI') + '\n';
+  let ctx = '\n\n## CUSTOMER 360 DATA';
+  if (yyyymm) ctx += ` (Period: ${yyyymm} — matches dashboard for this month)`;
+  ctx += '\n';
+  ctx += 'Data source: ' + (mode==='kpi'?'KPI Measures (dashboard)':mode==='dwh'?'DWH Raw Tables':'Both DWH + KPI') + '\n';
   matches.slice(0, 10).forEach(c => {
     ctx += `\n### ${c[0]} (${c[1]}) | BU: ${c[2]} | Country: ${c[3]}\n`;
     if ((mode==='kpi'||mode==='both') && typeof MONTHLY_KPI!=='undefined' && MONTHLY_KPI[c[0]]) {
@@ -380,12 +382,16 @@ function findCustomerData(query) {
       if(c[4]!==0) ctx += `YoY 24→25: ${((c[5]-c[4])/Math.abs(c[4])*100).toFixed(1)}%\n`;
     }
     if (mode==='kpi'||mode==='both') {
-      const k = c[7];
-      ctx += `\n**KPI MEASURES (Snowball — Year=2024,2025 — matches dashboard):**\n`;
-      if(k) {
-        ctx += `MRR: ${k.mrr.toLocaleString()} DKK | ARR Growth: ${k.growth}%\n`;
-        ctx += `NRR: ${k.nrr}% | GRR: ${k.grr}%\n`;
-      } else { ctx += `No KPI data for this customer.\n`; }
+      // Only show static KPI if no monthly KPI was shown above
+      const hasMonthlyKPI = typeof MONTHLY_KPI!=='undefined' && MONTHLY_KPI[c[0]];
+      if (!hasMonthlyKPI) {
+        const k = c[7];
+        ctx += `\n**KPI MEASURES (Year=2024,2025):**\n`;
+        if(k) {
+          ctx += `MRR: ${k.mrr.toLocaleString()} DKK | ARR Growth: ${k.growth}%\n`;
+          ctx += `NRR: ${k.nrr}% | GRR: ${k.grr}%\n`;
+        } else { ctx += `No KPI data for this customer.\n`; }
+      }
     }
     const cs = c[8];
     ctx += `\n**CASES (Year=2024,2025 — matches dashboard):**\n`;
