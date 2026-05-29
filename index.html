@@ -174,7 +174,15 @@
     <div class="hdr-txt"><h1>Customer 360 – Ask AI</h1><p>Engage & Amplify</p></div>
     <svg style="margin-left:auto;cursor:pointer;opacity:0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><svg style="cursor:pointer;opacity:0.5;margin-left:2px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg><button class="btn-min" onclick="collapseChat()">✕</button>
   </div>
-  <div class="desc">Describe the question you want, in your own words, and Ask AI will answer it quickly.</div>
+  <div class="desc">Ask about any customer across Subscription Revenue, Support Cases & Sales Pipeline.</div>
+  <div style="padding:6px 10px;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0;">
+    <div style="font-size:7px;color:#64748b;margin-bottom:4px;font-weight:500;">Choose your data source:</div>
+    <div style="display:flex;gap:4px;">
+      <button onclick="setMode('kpi')" id="modeKpi" style="flex:1;padding:6px 8px;font-size:8px;border:2px solid #3b82f6;background:#3b82f6;color:white;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">📊 KPI Measures<br><span style='font-size:6px;opacity:0.8;'>MRR, Growth%, NRR%, GRR%<br>Matches dashboard</span></button>
+      <button onclick="setMode('dwh')" id="modeDwh" style="flex:1;padding:6px 8px;font-size:8px;border:2px solid #e2e8f0;background:white;color:#475569;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">📋 DWH Tables<br><span style='font-size:6px;opacity:0.7;'>Raw DKK BR revenue<br>From fact tables</span></button>
+      <button onclick="setMode('both')" id="modeAll" style="flex:1;padding:6px 8px;font-size:8px;border:2px solid #e2e8f0;background:white;color:#475569;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">🔄 Both<br><span style='font-size:6px;opacity:0.7;'>KPI + DWH combined<br>Full 360 view</span></button>
+    </div>
+  </div>
   <div class="api-bar">
     <label>Key:</label>
     <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-api03-..." />
@@ -182,14 +190,12 @@
   </div>
   <div class="chat-area" id="chatArea">
     <div class="suggestions" id="suggestionsBlock">
-      <button class="suggestion" onclick="askSuggestion(this)">Region Hovedstaden revenue trend 2024 vs 2025</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Coop Norge month-on-month revenue</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Ejerkredsen Øs Indsigt 2024 vs 2025 growth</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Revenue breakdown by Division and BU</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Which BU has the most support cases?</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Pipeline ARR: Construction vs Healthcare</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Digital Welfare monthly revenue trend</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Sykehuspartner Hf revenue growth</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Region Hovedstaden — full 360 view</button>
+      <button class="suggestion" onclick="askSuggestion(this)">What is Coop Norge's MRR and Growth%?</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Compare Esbjerg Kommune KPIs vs revenue</button>
+      <button class="suggestion" onclick="askSuggestion(this)">How many cases does Aalborg Kommune have?</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Ejerkredsen Øs Indsigt growth story</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Which customers have the highest ARR Growth%?</button>
     </div>
   </div>
   <div class="footer">AI-generated content may have mistakes. Always verify with the dashboard visuals.</div>
@@ -236,6 +242,36 @@ function saveState(){
   lsSet('c360_messages',JSON.stringify(msgs.slice(-40)));
 }
 
+
+window.dataMode = 'kpi';
+function setMode(m){
+  window.dataMode=m;
+  document.getElementById('modeAll').style.background=m==='both'?'#3b82f6':'white';
+  document.getElementById('modeAll').style.color=m==='both'?'white':'#475569';
+  document.getElementById('modeAll').style.borderColor=m==='both'?'#3b82f6':'#e2e8f0';
+  document.getElementById('modeDwh').style.background=m==='dwh'?'#3b82f6':'white';
+  document.getElementById('modeDwh').style.color=m==='dwh'?'white':'#475569';
+  document.getElementById('modeDwh').style.borderColor=m==='dwh'?'#3b82f6':'#e2e8f0';
+  document.getElementById('modeKpi').style.background=m==='kpi'?'#3b82f6':'white';
+  document.getElementById('modeKpi').style.color=m==='kpi'?'white':'#475569';
+  document.getElementById('modeKpi').style.borderColor=m==='kpi'?'#3b82f6':'#e2e8f0';
+  lsSet('c360_mode',m);
+  // Show mode change notification in chat
+  var label = m==='kpi'?'📊 KPI Measures (matches dashboard)':m==='dwh'?'📋 DWH Raw Tables (fact table data)':'🔄 Both KPI + DWH combined';
+  addMessage('ai','Data source set to: **'+label+'**\n\nAsk me about any customer now.');
+}
+document.addEventListener('DOMContentLoaded',function(){var s=lsGet('c360_mode');if(s){window.dataMode=s;
+  document.getElementById('modeAll').style.background=s==='both'?'#3b82f6':'white';
+  document.getElementById('modeAll').style.color=s==='both'?'white':'#475569';
+  document.getElementById('modeAll').style.borderColor=s==='both'?'#3b82f6':'#e2e8f0';
+  document.getElementById('modeDwh').style.background=s==='dwh'?'#3b82f6':'white';
+  document.getElementById('modeDwh').style.color=s==='dwh'?'white':'#475569';
+  document.getElementById('modeDwh').style.borderColor=s==='dwh'?'#3b82f6':'#e2e8f0';
+  document.getElementById('modeKpi').style.background=s==='kpi'?'#3b82f6':'white';
+  document.getElementById('modeKpi').style.color=s==='kpi'?'white':'#475569';
+  document.getElementById('modeKpi').style.borderColor=s==='kpi'?'#3b82f6':'#e2e8f0';
+}});
+
 function expandChat(){
   document.getElementById('collapsedView').classList.add('hidden');
   document.getElementById('expandedView').classList.add('active');
@@ -248,106 +284,46 @@ function collapseChat(){
 }
 
 const CUSTOMER_DATA = [
-["Unknown","Unknown","Construction","Unknown",89.72,101.43,[12.79,6.4,5.09,7.65,6.66,6.96,8.74,7.43,6.4,7.26,7.24,7.09,7.55,7.64,7.91,8.24,8.46,8.62,8.85,8.94,8.76,8.91,8.78,8.77],null],
-["Unknown","Unknown","Beauty & Wellness","Unknown",74.31,85.89,[5.81,5.54,5.76,5.68,6.36,6.54,6.89,6.78,6.06,6.24,5.96,6.71,6.58,6.14,6.34,6.44,7.29,7.94,8.15,7.69,7.18,7.32,6.97,7.85],null],
-["Region Hovedstaden","Account-117061","Payroll, Rostering & Finance","DK",39.56,41.3,[3.06,2.74,3.22,3.22,3.22,3.24,3.23,3.22,3.22,3.35,3.34,4.49,3.8,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.41,3.42,3.48],{"t":16085,"c":15668,"o":54,"a":303,"b":"Silkeborg Data"}],
-["Unknown","Unknown","Global Delivery","Unknown",0,-74.31,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-6.21,-68.09],null],
-["Coop Norge Sa","Account-080605","Retail & Supply Chain","NO",29.83,31.9,[2.48,2.48,2.48,2.46,2.48,2.48,2.51,2.48,2.48,2.51,2.49,2.49,2.62,2.57,2.65,2.66,2.65,2.65,2.69,2.69,2.69,2.7,2.65,2.68],{"t":2685,"c":2682,"o":0,"a":80,"b":"EG Retail & Wholesale + EG Retail"}],
-["Region Syddanmark","Account-107749","Payroll, Rostering & Finance","DK",24.96,25.62,[2.12,2.06,2.08,2.08,2.07,2.08,2.08,2.08,2.07,2.09,2.07,2.09,2.12,2.12,2.12,2.12,2.15,2.13,2.12,2.12,2.15,2.16,2.15,2.16],{"t":5494,"c":5354,"o":25,"a":105,"b":"Silkeborg Data + Digital Welfare"}],
-["Unknown","Unknown","Utility","Unknown",29.15,19.68,[2.63,2.94,2.72,2.99,2.89,2.86,2.94,2.88,1.76,1.39,1.45,1.7,1.49,1.58,1.63,1.63,2,1.7,1.62,1.63,1.62,1.61,1.58,1.57],null],
-["Unknown","Unknown","Healthcare","Unknown",45.1,-1.58,[4.04,3.07,4.4,3.53,3.72,4.35,3.9,3.44,5.23,3.93,4.24,1.25,0.64,0.44,-0.27,-0.33,0.19,0.19,-0.01,0.11,0.21,-1.93,-0.68,-0.15],null],
-["Mestergruppen Regnskap og IT AS","Account-146079","Retail & Supply Chain","NO",22.23,22.76,[1.8,1.9,1.85,1.84,1.85,1.85,1.85,1.84,1.86,1.87,1.87,1.87,1.84,1.84,1.85,1.91,1.88,1.87,1.87,1.87,1.86,1.88,2.09,2],{"t":7828,"c":7473,"o":36,"a":276,"b":"EG Retail + EG Nexstep + Building Supply"}],
-["Region Midtjylland","Account-108059","Payroll, Rostering & Finance","DK",17.83,18.28,[1.53,1.43,1.47,1.47,1.47,1.51,1.48,1.49,1.47,1.53,1.48,1.5,1.52,1.51,1.54,1.51,1.52,1.51,1.52,1.52,1.52,1.52,1.53,1.58],{"t":1850,"c":1793,"o":8,"a":35,"b":"Silkeborg Data"}],
-["Ejerkredsen Øs Indsigt","Account-108034","Payroll, Rostering & Finance","DK",6.27,28.21,[0.51,0.51,0.51,0.51,0.51,0.51,0.53,0.53,0.53,0.53,0.53,0.55,0.55,0.55,0.55,2.95,2.95,2.95,2.95,2.95,2.95,2.95,2.95,2.95],{"t":0,"note":"N/A - may be logged under Odense Kommune EG ØS Indsigt (1,393 cases)"}],
-["Unknown","Unknown","Vigilo","Unknown",16.91,16.92,[1.4,1.29,1.37,1.37,1.39,1.4,1.35,1.51,1.44,1.45,1.45,1.47,1.58,1.54,1.51,1.51,1.54,1.51,1.85,1.97,1.94,1.96,0,0],null],
-["Norlys Group A/S","Account-109085","Utility","DK",18.24,8.21,[1.42,1.41,1.84,1.6,1.49,1.49,1.49,1.54,1.5,1.48,1.49,1.49,1.37,0.63,0.63,0.63,0.63,0.62,0.62,0.62,0.62,0.62,0.62,0.62],{"t":0,"note":"N/A - no CS data found"}],
-["Dsv A/S","Account-121348","Retail & Supply Chain","DK",12.7,13.55,[0.99,1.09,1.12,1.12,1.12,1.12,1.12,1.12,0.97,0.97,0.97,0.97,1.17,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13,1.13],{"t":0,"note":"N/A"}],
-["Evida Service A/S","Account-108156","Utility","DK",11.4,13.9,[1.1,0.7,0.96,0.96,1,0.95,0.96,0.91,0.99,1.08,1,0.78,1.21,0.93,1.13,0.99,0.91,1.15,0.02,2.53,1.5,1.67,1.14,0.71],{"t":1214,"c":1117,"o":19,"a":24,"b":"EG Utility"}],
-["Region Nordjylland","Account-109344","Payroll, Rostering & Finance","DK",12.26,12.68,[1.03,1,1.04,1.04,1.02,1.02,1.02,1.02,1.02,1.03,1.02,1.02,1.05,1.04,1.05,1.07,1.05,1.05,1.05,1.07,1.06,1.06,1.06,1.06],{"t":9329,"c":9154,"o":23,"a":176,"b":"Silkeborg Data + Digital Welfare"}],
-["Sykehuspartner Hf","Account-149033","Healthcare","NO",1.26,18.47,[0,0,0,0,0,0,0,0,0,0,0,1.26,1.26,1.26,1.26,1.25,1.25,2.5,1.41,1.41,1.52,1.6,1.49,2.26],{"t":0,"note":"N/A"}],
-["XL-BYG A.M.B.A","Account-046276","Retail & Supply Chain","DK",9.3,9.14,[0.64,0.67,0.83,0.85,0.61,0.84,0.82,0.82,1.08,0.54,0.82,0.77,0.82,0.83,0.83,0.81,0.82,0.96,0.46,0.7,0.69,0.69,0.69,0.85],null],
-["Odense Kommune","Account-108661","Payroll, Rostering & Finance","DK",8.59,9.08,[0.72,0.73,0.72,0.72,0.66,0.66,0.72,0.74,0.73,0.72,0.72,0.74,0.75,0.75,0.75,0.75,0.78,0.75,0.75,0.76,0.75,0.77,0.76,0.75],{"t":3556,"c":3494,"o":5,"a":82,"b":"Silkeborg Data + EG ØS Indsigt"}],
-["Texcon AS","Account-140211","Retail & Supply Chain","NO",7.59,8,[0.69,0.62,0.61,0.6,0.61,0.66,0.64,0.63,0.62,0.65,0.62,0.64,0.69,0.63,0.65,0.7,0.63,0.67,0.67,0.67,0.66,0.66,0.66,0.71],null],
-["Maakuntien tilakeskus Oy","Account-152825","Facility Management","FI",7.26,7.99,[0.58,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.66,0.63,0.66,0.66,0.66,0.62,0.68,0.68,0.67,0.68,0.68,0.71],null],
-["Energi Fyn Holding A/S","Account-114896","Utility","DK",7.29,7.67,[0.64,0.6,0.62,0.6,0.59,0.6,0.62,0.61,0.61,0.61,0.61,0.61,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64],{"t":1316,"c":1236,"o":18,"a":25,"b":"EG Utility"}],
-["Sport Holding AS","Account-100994","Retail & Supply Chain","NO",7.35,6.64,[0.61,0.51,0.42,0.59,0.51,0.55,0.5,0.57,0.49,0.76,0.58,1.25,0.7,0.78,0.69,0.12,0.54,0.58,0.47,0.58,0.58,0.57,0.57,0.45],null],
-["Silvan A/S","Account-119920","Retail & Supply Chain","DK",7.65,6.12,[0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.64,0.58,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.52,0.46,0.46,0.46,0.46],{"t":1342,"c":1280,"o":0,"a":61,"b":"EG ASPECT4"}],
-["Esbjerg Kommune","Account-107917","Payroll, Rostering & Finance","DK",6.78,6.98,[0.57,0.57,0.57,0.57,0.57,0.57,0.56,0.56,0.56,0.56,0.56,0.56,0.58,0.58,0.58,0.58,0.59,0.58,0.58,0.58,0.58,0.58,0.59,0.58],{"t":4832,"c":4712,"o":9,"a":92,"b":"Silkeborg Data + Digital Welfare"}],
-["ICC_EGSU_in_EGDK","Account-136771","Global Delivery","SE",0,13.41,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5.95,7.46],null],
-["Aalborg Kommune","Account-115883","Payroll, Rostering & Finance","DK",6.33,6.68,[0.54,0.48,0.53,0.53,0.53,0.52,0.53,0.53,0.53,0.54,0.54,0.54,0.56,0.56,0.56,0.55,0.56,0.56,0.56,0.56,0.55,0.56,0.56,0.56],{"t":5783,"c":5597,"o":36,"a":110,"b":"Silkeborg Data + Digital Welfare"}],
-["Kesko Oyj","Account-137419","Energy Management Systems","FI",2.7,9.92,[0.19,0,0.83,0.22,0.23,0.23,0.24,0.23,0.23,0.23,0.26,-0.17,0.8,0.82,0.81,0.83,0.83,0.83,0.83,0.84,0.84,0.84,0.83,0.83],{"t":3313,"c":2244,"o":259,"a":276,"b":"EG EMS"}],
-["Unknown","Unknown","Group Finance","Unknown",0,-12.57,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-12.57,0],null],
-["Freja Transport & Logistics Holding A/S","Account-114506","Retail & Supply Chain","DK",5.02,7.35,[0.37,0.42,0.88,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.39,0.39,0.54,0.62,0.62,0.62,1,0.62,0.62,0.66,0.62,0.62],null],
-["Aktieselskapet Vinmonopolet","Account-078238","Retail & Supply Chain","NO",5.86,6.09,[0.5,0.49,0.49,0.47,0.46,0.49,0.49,0.49,0.49,0.49,0.49,0.49,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51,0.51],null],
-["Byggmakker Handel AS","Account-116203","Retail & Supply Chain","NO",7.31,4.37,[0.61,0.61,0.61,0.61,0.61,0.61,0.6,0.61,0.61,0.61,0.61,0.62,0.64,0.64,0.64,0.64,0.65,0.65,0.08,0.1,0.09,0.09,0.09,0.09],{"t":1870,"c":1864,"o":0,"a":85,"b":"EG Nexstep"}],
-["Stark IT A/S","Account-147021","Retail & Supply Chain","DK",3.69,7.89,[0.22,0.22,0.22,1.31,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.13,0.22,0.22,1.11,1.11,1.11,1.11,1.11,1.11],null],
-["Skellefteå Kraftaktiebolag","Account-107378","Utility","SE",5.75,5.77,[0.44,0.44,0.44,0.47,0.49,0.49,0.47,0.48,0.5,0.53,0.53,0.48,0.49,0.48,0.49,0.49,0.49,0.48,0.47,0.46,0.48,0.48,0.48,0.48],{"t":1354,"c":1234,"o":32,"a":27,"b":"EG Utility"}],
-["Randers Kommune","Account-108404","Payroll, Rostering & Finance","DK",5.48,5.79,[0.45,0.45,0.46,0.45,0.46,0.46,0.46,0.46,0.46,0.46,0.46,0.46,0.47,0.47,0.47,0.5,0.48,0.48,0.48,0.48,0.5,0.51,0.49,0.49],{"t":5176,"c":5039,"o":16,"a":98,"b":"Silkeborg Data + Digital Welfare"}],
-["Silkeborg Kommune","Account-108029","Payroll, Rostering & Finance","DK",5.49,5.67,[0.49,0.43,0.46,0.46,0.45,0.46,0.46,0.46,0.46,0.46,0.46,0.46,0.49,0.44,0.47,0.47,0.5,0.47,0.47,0.47,0.47,0.47,0.47,0.48],{"t":3432,"c":3354,"o":11,"a":66,"b":"Silkeborg Data + Digital Welfare"}],
-["Herning Kommune","Account-107775","Payroll, Rostering & Finance","DK",5.34,5.67,[0.47,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.47,0.45,0.46,0.46,0.48,0.46,0.52,0.46,0.46,0.46,0.49,0.47,0.47,0.47],{"t":3260,"c":3195,"o":6,"a":63,"b":"Silkeborg Data"}],
-["Telinet Energi AB","Account-111801","Utility","SE",5.22,5.52,[0.49,0.4,0.44,0.48,0.4,0.43,0.45,0.41,0.42,0.45,0.45,0.41,0.44,0.46,0.47,0.5,0.51,0.46,0.44,0.46,0.44,0.44,0.44,0.45],{"t":1669,"c":1607,"o":12,"a":54,"b":"EG Utility"}],
-["Viborg Kommune","Account-109244","Payroll, Rostering & Finance","DK",5.15,5.43,[0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.45,0.44,0.44,0.47,0.45,0.45,0.45,0.45,0.47,0.45,0.45,0.45],{"t":3599,"c":3510,"o":12,"a":68,"b":"Silkeborg Data"}],
-["Kolding Kommune","Account-109579","Payroll, Rostering & Finance","DK",5.1,5.28,[0.43,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.42,0.43,0.43,0.43,0.44,0.44,0.44,0.46,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44],{"t":3901,"c":3809,"o":9,"a":75,"b":"Silkeborg Data + Digital Welfare"}],
-["Københavns Kommune","Account-108077","Digital Welfare","DK",5.37,4.99,[0.51,0.49,0.5,0.46,0.45,0.45,0.45,0.41,0.42,0.42,0.36,0.43,0.37,0.44,0.43,0.37,0.41,0.4,0.41,0.43,0.44,0.44,0.43,0.42],null],
-["Reitan Convenience Norway AS","Account-102812","Retail & Supply Chain","NO",5.61,4.63,[0.51,0.52,0.52,0.46,0.47,0.47,0.48,0.47,0.47,0.48,0.38,0.38,0.41,0.4,0.4,0.38,0.38,0.38,0.39,0.38,0.38,0.38,0.38,0.38],null],
-["Gasnätet Stockholm AB","Account-112583","Utility","SE",4.82,5.11,[0.39,0.39,0.4,0.39,0.39,0.45,0.39,0.41,0.41,0.4,0.4,0.4,0.4,0.42,0.44,0.43,0.42,0.43,0.42,0.43,0.43,0.43,0.43,0.43],null],
-["Helse Vest Ikt AS","Account-173366","Healthcare","NO",0.72,9.07,[0,0,0,0,0,0,0,0,0,0,0,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.72,0.97,0.82,0.79],null],
-["Convene AS","Account-173081","Healthcare","NO",5.39,4.27,[0.38,0.33,0.37,0.36,0.36,0.52,0.48,0.49,0.45,0.57,0.55,0.55,0.55,0.47,0.48,0.47,0.01,0.71,0.41,0.71,0.41,-0.26,-0.05,0.35],null],
-["Godel i Sverige AB","Account-107195","Utility","SE",4.42,5.15,[0.3,0.31,0.3,0.38,0.37,0.38,0.39,0.39,0.4,0.4,0.4,0.41,0.41,0.42,0.42,0.43,0.43,0.43,0.43,0.43,0.43,0.44,0.44,0.44],null],
-["Beijer Byggmaterial AB","Account-142848","Retail & Supply Chain","SE",3.46,6.05,[0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.79,0.79,0.79,0.79,0.79],null],
-["Unknown","Unknown","Energy Management Systems","Unknown",9.28,0.13,[-6.29,6.3,-4.05,1.86,1.78,1.78,1.71,1.82,1.82,4.56,-2.58,0.57,0.57,0.39,-0.81,-0.1,0,0.01,0.01,0.12,0.02,0.12,-0.22,0],null],
-["ICC_EGDK_in_EGSU","Account-169906","Global Delivery","DK",0,9.27,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.24,9.03],null],
-["Öob AB","Account-076901","Retail & Supply Chain","SE",4.35,4.92,[0.36,0.35,0.35,0.34,0.34,0.34,0.36,0.38,0.37,0.37,0.39,0.39,0.45,0.42,0.42,0.42,0.42,0.42,0.4,0.35,0.41,0.38,0.43,0.41],null],
-["Senaatti-kiinteistöt","Account-152796","Facility Management","FI",4.21,4.95,[0.31,0.31,0.33,0.35,0.34,0.36,0.36,0.36,0.36,0.37,0.38,0.38,0.38,0.39,0.4,0.4,0.4,0.4,0.4,0.4,0.43,0.45,0.45,0.46],null],
-["Öresundskraft AB","Account-107482","Utility","SE",4.41,4.69,[0.36,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.38,0.4,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.4,0.39,0.39],null],
-["Granngården AB","Account-090312","Retail & Supply Chain","SE",4.41,4.63,[0.38,0.33,0.37,0.36,0.37,0.37,0.38,0.37,0.37,0.37,0.37,0.37,0.4,0.39,0.39,0.39,0.39,0.39,0.38,0.38,0.38,0.38,0.38,0.38],null],
-["Frederiksberg Kommune","Account-108280","Payroll, Rostering & Finance","DK",4.47,4.55,[0.36,0.38,0.38,0.38,0.37,0.37,0.37,0.36,0.37,0.37,0.37,0.38,0.37,0.37,0.37,0.4,0.4,0.38,0.37,0.37,0.38,0.38,0.38,0.38],{"t":2824,"c":2702,"o":23,"a":54,"b":"Silkeborg Data + Digital Welfare"}],
-["Arbejdsmarkedets Tillægspension","Account-109738","Digital Welfare","DK",4.22,4.62,[0.31,0.31,0.36,0.36,0.36,0.36,0.35,0.47,0.25,0.36,0.36,0.36,0.36,0.36,0.37,0.42,0.38,0.38,0.38,0.38,0.39,0.39,0.39,0.41],null],
-["Unknown","Unknown","Legal","Unknown",3.76,4.95,[0.28,0.26,0.3,0.27,0.3,0.27,0.35,0.27,0.33,0.45,0.34,0.34,0.35,0.35,0.35,0.37,0.39,0.4,0.4,0.41,0.43,0.39,0.51,0.58],null],
-["Motonet Oy","Account-120962","Retail & Supply Chain","FI",3.77,4.72,[0.26,0.27,0.27,0.32,0.32,0.32,0.32,0.32,0.38,0.33,0.33,0.33,0.34,0.33,0.33,0.33,0.33,0.33,0.34,0.34,0.44,0.37,0.87,0.36],null],
-["Gladsaxe Kommune","Account-112940","Payroll, Rostering & Finance","DK",4.14,4.31,[0.35,0.35,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.35,0.35,0.35,0.35,0.35,0.36,0.36,0.36,0.36,0.38,0.36,0.36,0.36],{"t":3632,"c":3577,"o":11,"a":76,"b":"Silkeborg Data + EG ØS Indsigt"}],
-["Vantaan kaupunki","Account-152874","Facility Management","FI",5.15,3.23,[0.42,0.42,0.42,0.42,0.42,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.44,0.26,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25],null],
-["Hjørring Kommune","Account-107977","Payroll, Rostering & Finance","DK",4.07,4.27,[0.33,0.37,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.35,0.35,0.35,0.39,0.31,0.35,0.35,0.35,0.36,0.36,0.39,0.36],{"t":4286,"c":4207,"o":8,"a":91,"b":"Silkeborg Data + EG ØS Indsigt"}],
-["Region Sjælland","Account-109362","Digital Welfare","DK",3.98,4.36,[0.32,0.32,0.32,0.36,0.35,0.34,0.33,0.33,0.34,0.33,0.33,0.33,0.4,0.34,0.34,0.34,0.34,0.34,0.41,0.36,0.36,0.39,0.37,0.37],null],
-["Norlys Digital A/S","Account-174235","Utility","DK",0,8.3,[0,0,0,0,0,0,0,0,0,0,0,0,0,0.74,0.75,0.74,0.75,0.76,0.76,0.76,0.76,0.76,0.76,0.76],null],
-["St1 Nordic Oy","Account-101981","Retail & Supply Chain","FI",3.83,4.41,[0.29,0.29,0.29,0.32,0.3,0.3,0.3,0.34,0.34,0.35,0.35,0.35,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.46,0.36,0.27,0.37],null],
-["Aura A/S","Account-114912","Utility","DK",4.23,3.97,[0.33,0.33,0.33,0.32,0.32,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.29,0.29,0.29,0.29,0.29,0.29],null],
-["Kitchn AS","Account-083108","Retail & Supply Chain","NO",3.53,4.38,[0.3,0.3,0.3,0.27,0.26,0.26,0.3,0.31,0.31,0.31,0.31,0.31,0.33,0.33,0.32,0.32,0.44,0.38,0.38,0.38,0.38,0.37,0.37,0.37],null],
-["Esbjerg Kommune","Account-107917","Digital Welfare","DK",3.75,3.94,[0.28,0.31,0.32,0.32,0.29,0.3,0.31,0.31,0.34,0.32,0.32,0.34,0.32,0.32,0.33,0.33,0.34,0.33,0.33,0.33,0.33,0.33,0.33,0.34],{"t":4832,"c":4712,"o":9,"a":92,"b":"Silkeborg Data + Digital Welfare"}],
-["Kentaur A/S","Account-108090","Retail & Supply Chain","DK",3.42,3.98,[0.28,0.47,0.31,0.3,0.36,0.16,0.17,0.25,0.25,0.32,0.44,0.12,0.28,0.32,0.26,0.64,0.33,0.37,0.28,0.3,0.34,0.3,0.28,0.28],null],
-["Haderslev Kommune","Account-107963","Payroll, Rostering & Finance","DK",3.6,3.8,[0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.32,0.31,0.35,0.33,0.31,0.31,0.31,0.31,0.32,0.31,0.31,0.31,0.31],{"t":1531,"c":1494,"o":2,"a":29,"b":"Silkeborg Data"}],
-["Region Syddanmark","Account-107749","Healthcare","DK",3.61,3.75,[0.27,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.31,0.31,0.31,0.31,0.31,0.31,0.31,0.31,0.31,0.29,0.36,0.31,0.31],{"t":5494,"c":5354,"o":25,"a":105,"b":"Silkeborg Data + Digital Welfare"}],
-["Mälarenergi AB","Account-107715","Utility","SE",3.49,3.83,[0.31,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.3,0.4,0.31,0.31,0.32,0.31,0.31,0.31,0.32,0.3,0.32,0.32],null],
-["Ballerup Kommune","Account-108084","Payroll, Rostering & Finance","DK",3.55,3.73,[0.29,0.3,0.29,0.29,0.29,0.29,0.29,0.29,0.31,0.3,0.3,0.3,0.3,0.35,0.31,0.31,0.31,0.31,0.28,0.31,0.31,0.31,0.31,0.31],{"t":1961,"c":1924,"o":4,"a":38,"b":"Silkeborg Data"}],
-["Eko-Gruppen Hässleholm AB","Account-097330","Retail & Supply Chain","SE",3.04,3.93,[0.24,0.24,0.24,0.24,0.21,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.29,0.29,0.3,0.31,0.32,0.32,0.32,0.35,0.35,0.39,0.35,0.35],null],
-["Kesko Oyj","Account-137419","Retail & Supply Chain","FI",0,6.95,[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.15,1.17,1.14,1.15,1.17,1.17],{"t":3313,"c":2244,"o":259,"a":276,"b":"EG EMS"}],
-["Silkeborg Kommune","Account-108029","Digital Welfare","DK",3.26,3.63,[0.25,0.26,0.28,0.28,0.28,0.27,0.28,0.28,0.28,0.28,0.27,0.27,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.33,0.31,0.31],{"t":3432,"c":3354,"o":11,"a":66,"b":"Silkeborg Data + Digital Welfare"}],
-["Skive Kommune","Account-117037","Payroll, Rostering & Finance","DK",3.32,3.54,[0.28,0.28,0.28,0.28,0.28,0.27,0.29,0.27,0.27,0.27,0.27,0.27,0.29,0.27,0.29,0.29,0.29,0.32,0.3,0.3,0.3,0.3,0.3,0.3],{"t":2353,"c":2296,"o":12,"a":45,"b":"Silkeborg Data"}],
-["Fujitsu A/S I Likvidation","Account-107301","Payroll, Rostering & Finance","DK",4.45,2.34,[0.36,0.36,0.36,0.36,0.36,0.36,0.37,0.37,0.37,0.42,0.41,0.38,0.38,0.38,0.38,0.41,0.4,0.39,0.39,-0.4,0,0,0,0],null],
-["Faaborg-Midtfyn Kommune","Account-109501","Payroll, Rostering & Finance","DK",3.25,3.31,[0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28],{"t":1793,"c":1764,"o":1,"a":34,"b":"Silkeborg Data"}],
-["Kolding Kommune","Account-109579","Digital Welfare","DK",3.26,3.3,[0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.31,0.31,0.3,0.27,0.27,0.27,0.28,0.27,0.27,0.27,0.27,0.27,0.29,0.29,0.27],{"t":3901,"c":3809,"o":9,"a":75,"b":"Silkeborg Data + Digital Welfare"}],
-["Frederiksberg Kommune","Account-108280","Digital Welfare","DK",3.33,3.09,[0.26,0.26,0.26,0.26,0.28,0.28,0.28,0.3,0.28,0.28,0.28,0.32,0.07,0.26,0.26,0.26,0.26,0.26,0.27,0.26,0.26,0.27,0.26,0.4],{"t":2824,"c":2702,"o":23,"a":54,"b":"Silkeborg Data + Digital Welfare"}],
-["Tiger AS","Account-080624","Retail & Supply Chain","NO",3.06,3.34,[0.28,0.29,0.29,0.19,0.19,0.24,0.27,0.23,0.27,0.27,0.27,0.27,0.29,0.28,0.28,0.28,0.28,0.28,0.29,0.27,0.27,0.27,0.28,0.27],null],
-["Holstebro Kommune","Account-107986","Payroll, Rostering & Finance","DK",3.09,3.23,[0.27,0.25,0.25,0.25,0.27,0.25,0.25,0.25,0.25,0.28,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.33],{"t":4562,"c":4470,"o":21,"a":97,"b":"Silkeborg Data + EG ØS Indsigt"}],
-["Region Nordjylland","Account-109344","Digital Welfare","DK",3.06,3.09,[0.22,0.26,0.25,0.27,0.27,0.27,0.25,0.24,0.25,0.25,0.25,0.3,0.25,0.25,0.25,0.25,0.28,0.25,0.26,0.25,0.26,0.25,0.27,0.27],{"t":9329,"c":9154,"o":23,"a":176,"b":"Silkeborg Data + Digital Welfare"}],
-["Aarhus Kommune","Account-108206","Digital Welfare","DK",3.15,2.96,[0.32,0.33,0.24,0.25,0.26,0.25,0.26,0.26,0.24,0.25,0.25,0.24,0.26,0.22,0.21,0.31,0.26,0.24,0.24,0.25,0.25,0.25,0.24,0.24],null],
-["Davidsen A/S","Account-108273","Retail & Supply Chain","DK",4.49,1.54,[0.34,0.34,0.33,0.33,0.33,0.33,0.33,0.33,0.33,0.33,0.57,0.57,0.59,0.59,0.36,0,0,0,0,0,0,0,0,0],null],
-["Aalborg Service A/S","Account-126700","Utility","DK",2.97,3.05,[0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.26,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25],null],
-["Energi Viborg A/S","Account-108121","Utility","DK",2.66,3.35,[0.21,0.21,0.21,0.21,0.22,0.22,0.21,0.22,0.25,0.23,0.23,0.24,0.29,0.32,0.3,0.28,0.27,0.28,0.27,0.27,0.26,0.26,0.26,0.27],null],
-["Ewii A/S","Account-108329","Utility","DK",2.76,3.22,[0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],null],
-["Ikast-Brande Kommune","Account-109277","Payroll, Rostering & Finance","DK",3.06,2.9,[0.31,0.28,0.27,0.24,0.24,0.24,0.25,0.26,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24],{"t":1492,"c":1445,"o":5,"a":28,"b":"Silkeborg Data"}],
-["Intersport AB","Account-076895","Retail & Supply Chain","SE",2.83,3.05,[0.24,0.24,0.24,0.23,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.26,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.24,0.24,0.33],null],
-["Syddjurs Kommune","Account-109314","Payroll, Rostering & Finance","DK",2.85,2.95,[0.23,0.27,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.27,0.23,0.24,0.24,0.24,0.24,0.28,0.24,0.24,0.24,0.24,0.24,0.25,0.24],{"t":4633,"c":4557,"o":12,"a":99,"b":"Silkeborg Data + EG ØS Indsigt + Digital Welfare"}],
-["Ok-Fonden","Account-116058","Payroll, Rostering & Finance","DK",2.86,2.87,[0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.23,0.24,0.24,0.25,0.25,0.25,0.25,0.23,0.23,0.23,0.23,0.23,0.23,0.25,0.23],{"t":1037,"c":997,"o":5,"a":20,"b":"Silkeborg Data"}],
-["KK Group Cooling A/S","Account-136786","Retail & Supply Chain","DK",2.61,3.07,[0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.22,0.22,0.33,0.32,0.32,0.29],null],
-["Kemp & Lauritzen A/S","Account-136797","Construction","DK",2.6,2.74,[0.21,0.21,0.21,0.21,0.21,0.21,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23],{"t":704,"c":662,"o":3,"a":16,"b":"EG Construction"}],
-["Region Midtjylland - Psykiatristaben","Account-116902","Digital Welfare","DK",2.63,2.57,[0.23,0.22,0.22,0.22,0.22,0.22,0.22,0.21,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.21,0.21,0.21,0.21,0.21,0.21],null],
-["Boligkontoret Danmark","Account-114661","Housing","DK",2.54,2.64,[0.25,0.2,0.2,0.23,0.2,0.2,0.22,0.2,0.2,0.22,0.21,0.23,0.23,0.21,0.2,0.23,0.22,0.21,0.24,0.23,0.21,0.22,0.22,0.22],null],
-["Skovbo Data ApS","Account-117298","Brandsoft","DK",2.67,2.47,[0.22,0.22,0.22,0.22,0.22,0.23,0.22,0.22,0.23,0.23,0.23,0.22,0.2,0.2,0.2,0.2,0.2,0.21,0.22,0.21,0.21,0.21,0.21,0.19],{"t":996,"c":978,"o":0,"a":19,"b":"EG Brandsoft"}],
-["Unknown","Unknown","Groupcare","Unknown",1.67,2.36,[0.14,0.09,-0.01,0.09,0.09,0,0.17,0.26,0.15,0.23,0.23,0.23,0.21,0.21,0.21,0.21,0.21,0.19,0.19,0.19,0.19,0.19,0.19,0.19],null],
-["Unknown","Unknown","Facility Management","Unknown",0.34,3.18,[0.05,0.05,0.03,0.14,0,-0.01,0.02,0.01,-0.03,0.05,0,0.02,-0.2,0.33,0.38,0.27,0.29,0.25,0.26,0.33,0.42,0.3,0.26,0.28],null],
-["Unknown","Unknown","Quality & Asset Management","Unknown",1.77,1,[0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.08,0.08,0.08,0.08,0.08,0.08,0,0.16,0.11,0.08,0.08,0.08],null],
-["Unknown","Unknown","Retail & Supply Chain","Unknown",-0.95,-1.08,[0.12,-0.35,-0.78,-0.82,0.29,0.3,0.32,0.02,0,0,0.03,-0.07,-0.08,0.03,-0.8,-0.23,0,0,-0.01,0,0,-0.01,0,0],null]
+["Region Hovedstaden","Account-117061","Payroll, Rostering & Finance","DK",39.56,41.3,12.03,{"mrr": 78098, "growth": 105.57, "nrr": 101.85, "grr": 100},{"cases": 7401, "closed": 7258, "backlog": 16067}],
+["Coop Norge Sa","Account-080605","Retail & Supply Chain","NO",29.83,31.9,10.98,{"mrr": 61787, "growth": 107.15, "nrr": 106.66, "grr": 100},{"cases": 1560, "closed": 1559, "backlog": 0}],
+["Region Syddanmark","Account-107749","Payroll, Rostering & Finance","DK",24.96,25.62,8.77,{"mrr": 59781, "growth": 101.55, "nrr": 102.53, "grr": 100},{"cases": 1513, "closed": 1484, "backlog": 16067}],
+["Mestergruppen Regnskap og IT AS","Account-146079","Retail & Supply Chain","NO",22.23,22.76,7.9,{"mrr": 47129, "growth": 104.98, "nrr": 105.64, "grr": 100},{"cases": 4167, "closed": 3927, "backlog": 0}],
+["Region Midtjylland","Account-108059","Payroll, Rostering & Finance","DK",17.83,18.28,6.51,{"mrr": 36929, "growth": 106.28, "nrr": 106.09, "grr": 100},{"cases": 834, "closed": 814, "backlog": 16067}],
+["Region Nordjylland","Account-109344","Payroll, Rostering & Finance","DK",12.26,12.68,4.22,{"mrr": 31842, "growth": 102.45, "nrr": 102.64, "grr": 100},{"cases": 4101, "closed": 4059, "backlog": 16067}],
+["Ejerkredsen Øs Indsigt","Account-108034","Payroll, Rostering & Finance","DK",6.27,28.21,11.8,{"mrr": 34481, "growth": 450.08, "nrr": 532.29, "grr": 100},null],
+["Evida Service A/S","Account-108156","Utility","DK",11.4,13.9,4.23,{"mrr": 21088, "growth": 116.16, "nrr": 104.79, "grr": 99.54},null],
+["Norlys Group A/S","Account-109085","Utility","DK",18.24,8.21,0.03,{"mrr": 25884, "growth": 42.06, "nrr": 42.35, "grr": 100},null],
+["Odense Kommune","Account-108661","Payroll, Rostering & Finance","DK",8.59,9.08,3.06,{"mrr": 20900, "growth": 110.49, "nrr": 107.3, "grr": 100},{"cases": 1655, "closed": 1635, "backlog": 16067}],
+["Esbjerg Kommune","Account-107917","Payroll, Rostering & Finance","DK",6.78,6.98,2.37,{"mrr": 20887, "growth": 103.25, "nrr": 101.39, "grr": 100},{"cases": 2478, "closed": 2459, "backlog": 16067}],
+["Dsv A/S","Account-121348","Retail & Supply Chain","DK",12.7,13.55,0.7,{"mrr": 26251, "growth": 106.7, "nrr": 116.2, "grr": 100},null],
+["Silkeborg Kommune","Account-108029","Payroll, Rostering & Finance","DK",5.49,5.67,2,{"mrr": 17621, "growth": 104.45, "nrr": 106.54, "grr": 100},{"cases": 1824, "closed": 1796, "backlog": 16067}],
+["XL-BYG A.M.B.A","Account-046276","Retail & Supply Chain","DK",9.3,9.14,2.34,{"mrr": 18431, "growth": 99.51, "nrr": 55.35, "grr": 97.42},null],
+["Kolding Kommune","Account-109579","Payroll, Rostering & Finance","DK",5.1,5.28,1.78,{"mrr": 16470, "growth": 102.19, "nrr": 97.39, "grr": 100},{"cases": 2103, "closed": 2075, "backlog": 16067}],
+["Sykehuspartner Hf","Account-149033","Healthcare","NO",1.26,18.47,5.95,{"mrr": 20961, "growth": 486.84, "nrr": 92.21, "grr": 100},null],
+["Kesko Oyj","Account-137419","Energy Management Systems","FI",2.7,9.92,2.91,{"mrr": 19749, "growth": 587.18, "nrr": 100, "grr": 100},{"cases": 2099, "closed": 1546, "backlog": 0}],
+["Randers Kommune","Account-108404","Payroll, Rostering & Finance","DK",5.48,5.79,2,{"mrr": 16270, "growth": 104.61, "nrr": 102.98, "grr": 100},{"cases": 2658, "closed": 2618, "backlog": 16067}],
+["Aalborg Kommune","Account-115883","Payroll, Rostering & Finance","DK",6.33,6.68,2.28,{"mrr": 16007, "growth": 102.97, "nrr": 104.28, "grr": 99.91},{"cases": 2965, "closed": 2880, "backlog": 16067}],
+["Frederiksberg Kommune","Account-108280","Payroll, Rostering & Finance","DK",4.47,4.55,1.88,{"mrr": 14863, "growth": 96.2, "nrr": 74.81, "grr": 100},{"cases": 1388, "closed": 1357, "backlog": 16067}],
+["Texcon AS","Account-140211","Retail & Supply Chain","NO",7.59,8,2.76,{"mrr": 15007, "growth": 107.77, "nrr": 113.36, "grr": 100},null],
+["Energi Fyn Holding A/S","Account-114896","Utility","DK",7.29,7.67,2.69,{"mrr": 14886, "growth": 106.31, "nrr": 105.94, "grr": 100},null],
+["Silvan A/S","Account-119920","Retail & Supply Chain","DK",7.65,6.12,1.84,{"mrr": 13775, "growth": 80.02, "nrr": 78.89, "grr": 100},{"cases": 597, "closed": 594, "backlog": 0}],
+["Viborg Kommune","Account-109244","Payroll, Rostering & Finance","DK",5.15,5.43,1.84,{"mrr": 12590, "growth": 101.72, "nrr": 99.22, "grr": 100},{"cases": 1990, "closed": 1969, "backlog": 16067}],
+["Herning Kommune","Account-107775","Payroll, Rostering & Finance","DK",5.34,5.67,1.97,{"mrr": 12834, "growth": 105.55, "nrr": 106.04, "grr": 100},{"cases": 1929, "closed": 1902, "backlog": 16067}],
+["Gladsaxe Kommune","Account-112940","Payroll, Rostering & Finance","DK",4.14,4.31,1.48,{"mrr": 11375, "growth": 107.43, "nrr": 104.37, "grr": 100},{"cases": 2248, "closed": 2233, "backlog": 16067}],
+["Aktieselskapet Vinmonopolet","Account-078238","Retail & Supply Chain","NO",5.86,6.09,2.15,{"mrr": 12046, "growth": 103.93, "nrr": 103.49, "grr": 100},null],
+["Maakuntien tilakeskus Oy","Account-152825","Facility Management","FI",7.26,7.99,2.9,{"mrr": 15230, "growth": 109.86, "nrr": 116.38, "grr": 100},null],
+["Stark IT A/S","Account-147021","Retail & Supply Chain","DK",3.69,7.89,4.57,{"mrr": 10911, "growth": 272.98, "nrr": 511.44, "grr": 100},null],
+["Hjørring Kommune","Account-107977","Payroll, Rostering & Finance","DK",4.07,4.27,1.47,{"mrr": 9688, "growth": 101.81, "nrr": 105.11, "grr": 100},{"cases": 2120, "closed": 2080, "backlog": 16067}],
+["Skellefteå Kraftaktiebolag","Account-107378","Utility","SE",5.75,5.77,2.02,{"mrr": 9244, "growth": 105.68, "nrr": 106.33, "grr": 100},null],
+["Granngården AB","Account-090312","Retail & Supply Chain","SE",4.41,4.63,1.33,{"mrr": 9044, "growth": 104.98, "nrr": 103.17, "grr": 100},null],
+["Ballerup Kommune","Account-108084","Payroll, Rostering & Finance","DK",3.55,3.73,1.27,{"mrr": 9040, "growth": 101.8, "nrr": 106.96, "grr": 100},{"cases": 1120, "closed": 1107, "backlog": 16067}],
+["Godel i Sverige AB","Account-107195","Utility","SE",4.42,5.15,1.75,{"mrr": 9572, "growth": 116.38, "nrr": 108.91, "grr": 100},null],
+["Ok-Fonden","Account-116058","Payroll, Rostering & Finance","DK",2.86,2.87,0.96,{"mrr": 8168, "growth": 103.15, "nrr": 103.71, "grr": 100},{"cases": 913, "closed": 892, "backlog": 16067}],
+["Syddjurs Kommune","Account-109314","Payroll, Rostering & Finance","DK",2.85,2.95,1,{"mrr": 8472, "growth": 103.87, "nrr": 106.91, "grr": 100},{"cases": 2121, "closed": 2103, "backlog": 16067}],
+["Holstebro Kommune","Account-107986","Payroll, Rostering & Finance","DK",3.09,3.23,1.1,null,{"cases": 2352, "closed": 2326, "backlog": 16067}],
+["Ikast-Brande Kommune","Account-109277","Payroll, Rostering & Finance","DK",3.06,2.9,0.99,null,{"cases": 996, "closed": 988, "backlog": 16067}],
+["Faaborg-Midtfyn Kommune","Account-109501","Payroll, Rostering & Finance","DK",3.25,3.31,1.13,null,{"cases": 1105, "closed": 1098, "backlog": 16067}],
+["Aarhus Kommune","Account-108206","Digital Welfare","DK",3.15,2.96,0.92,{"mrr": 12721, "growth": 316.28, "nrr": 319.12, "grr": 100},{"cases": 2740, "closed": 2640, "backlog": 25432}]
 ];
 
 
@@ -364,39 +340,35 @@ function findCustomerData(query) {
     return false;
   });
   if (matches.length === 0) return '';
-  const months = ['Jan24','Feb24','Mar24','Apr24','May24','Jun24','Jul24','Aug24','Sep24','Oct24','Nov24','Dec24','Jan25','Feb25','Mar25','Apr25','May25','Jun25','Jul25','Aug25','Sep25','Oct25','Nov25','Dec25'];
-  let ctx = '\n\n## CUSTOMER 360 DATA (matched from embedded data)\n';
-  ctx += 'Below is the COMPLETE view across all models for this customer. Use ALL of this data to answer.\n';
+  const mode = window.dataMode || 'both';
+  let ctx = '\n\n## CUSTOMER 360 DATA (matches dashboard numbers, Year filter=2024,2025)\n';
+  ctx += 'Data source: ' + (mode==='kpi'?'KPI Measures (dashboard)':mode==='dwh'?'DWH Raw Tables':' Both DWH + KPI') + '\n';
   matches.slice(0, 10).forEach(c => {
     ctx += `\n### ${c[0]} (${c[1]}) | BU: ${c[2]} | Country: ${c[3]}\n`;
-    ctx += `\n**SUBSCRIPTION REVENUE (SB Model):**\n`;
-    ctx += `2024 Total: ${c[4]}M DKK | 2025 Total: ${c[5]}M DKK`;
-    if(c[4]!==0) ctx += ` | YoY: ${((c[5]-c[4])/Math.abs(c[4])*100).toFixed(1)}%`;
-    ctx += `\nMonthly 2024: `;
-    for(let i=0;i<12;i++) ctx += `${months[i]}:${c[6][i]} `;
-    ctx += `\nMonthly 2025: `;
-    for(let i=12;i<24;i++) ctx += `${months[i]}:${c[6][i]} `;
-    ctx += '\n';
-    
-    // CS data (index 7)
-    const cs = c[7];
-    ctx += `\n**CUSTOMER SERVICE (CS Model):**\n`;
-    if(cs && cs.t > 0) {
-      ctx += `Total Cases: ${cs.t.toLocaleString()} | Closed: ${cs.c.toLocaleString()} | Open: ${cs.o} | Avg/Month: ${cs.a}\n`;
-      ctx += `Close Rate: ${(cs.c/cs.t*100).toFixed(1)}% | CS BU: ${cs.b}\n`;
-    } else if(cs && cs.note) {
-      ctx += `${cs.note}\n`;
-    } else {
-      ctx += `No per-customer CS case data available. Check BU-level case data above.\n`;
+    if (mode==='dwh'||mode==='both') {
+      ctx += `\n**RAW DWH DATA (SB_FactCustomer — DKK BR in millions):**\n`;
+      ctx += `2024: ${c[4]}M | 2025: ${c[5]}M | 2026 YTD: ${c[6]}M\n`;
+      if(c[4]!==0) ctx += `YoY 24→25: ${((c[5]-c[4])/Math.abs(c[4])*100).toFixed(1)}%\n`;
     }
-    
-    // SR note
-    ctx += `\n**SALES PIPELINE (SR Model):**\n`;
-    ctx += `Per-customer pipeline data is tracked at BU level. Refer to the SR pipeline section above for ${c[2]} BU pipeline.\n`;
+    if (mode==='kpi'||mode==='both') {
+      const k = c[7];
+      ctx += `\n**KPI MEASURES (Snowball — Year=2024,2025 — matches dashboard):**\n`;
+      if(k) {
+        ctx += `MRR: ${k.mrr.toLocaleString()} DKK | ARR Growth: ${k.growth}%\n`;
+        ctx += `NRR: ${k.nrr}% | GRR: ${k.grr}%\n`;
+      } else { ctx += `No KPI data for this customer.\n`; }
+    }
+    const cs = c[8];
+    ctx += `\n**CASES (Year=2024,2025 — matches dashboard):**\n`;
+    if(cs) {
+      ctx += `Opened: ${cs.cases.toLocaleString()} | Closed: ${cs.closed.toLocaleString()}`;
+      if(cs.backlog) ctx += ` | Backlog: ${cs.backlog.toLocaleString()}`;
+      ctx += `\nClose Rate: ${(cs.closed/cs.cases*100).toFixed(1)}%\n`;
+    } else { ctx += `No per-customer CS data.\n`; }
+    ctx += `\n**SALES PIPELINE:** Tracked at BU level — refer to ${c[2]} BU pipeline data.\n`;
   });
   return ctx;
 }
-
 
 const DASHBOARD_CONTEXT=`You are the AI assistant for the **Customer 360** dashboard at EG A/S. You have embedded data from 3 composite models: Subscription Business (SB), Customer Service (CS), and Sales Revenue (SR).
 
@@ -608,6 +580,13 @@ CROSS-MODEL RELATIONSHIPS
 - All 3 models share the same Division→BU hierarchy
 
 Keep answers concise. Never invent data. Reference the model when relevant.
+
+IMPORTANT — CUSTOMER 360 CAPABILITY (Data: May 2026):
+KPI values (MRR, Growth%, NRR%, GRR%) are extracted WITH Year=2024,2025 filter — they MATCH the dashboard exactly.
+DWH values (DKK BR) are raw fact table sums — a different metric from MRR.
+When user selects 'KPI Measures', always show MRR/Growth/NRR/GRR — these match the dashboard Snowball cards.
+When user selects 'DWH Tables', show raw billing revenue (DKK BR in millions).
+Cases data is also filtered to Year=2024,2025 to match the dashboard.
 
 IMPORTANT — CUSTOMER 360 CAPABILITY:
 You have per-customer data from ALL 3 models for the top 100 customers:
