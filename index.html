@@ -337,7 +337,7 @@ function findCustomerData(query) {
       if (p2) { yyyymm = p2[1] + mNum; break; }
     }
   }
-  const matches = CUSTOMER_DATA.filter(c => {
+  let matches = CUSTOMER_DATA.filter(c => {
     const name = c[0].toLowerCase().normalize('NFC');
     const code = c[1].toLowerCase();
     if (name.length > 3 && q.includes(name)) return true;
@@ -347,7 +347,13 @@ function findCustomerData(query) {
     if (nameWords.length > 0 && matchCount >= Math.ceil(nameWords.length * 0.5)) return true;
     return false;
   });
+  // If no customer found but we have a previous match, reuse it (for follow-up questions)
+  if (matches.length === 0 && window._lastMatchedCustomers && window._lastMatchedCustomers.length > 0) {
+    matches = window._lastMatchedCustomers;
+  }
   if (matches.length === 0) return '';
+  // Save for follow-ups
+  window._lastMatchedCustomers = matches;
   const mode = window.dataMode || 'both';
   let ctx = '\n\n## CUSTOMER 360 DATA';
   if (yyyymm) ctx += ` (Period: ${yyyymm} — matches dashboard for this month)`;
