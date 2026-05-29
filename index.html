@@ -175,13 +175,11 @@
     <svg style="margin-left:auto;cursor:pointer;opacity:0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><svg style="cursor:pointer;opacity:0.5;margin-left:2px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg><button class="btn-min" onclick="collapseChat()">✕</button>
   </div>
   <div class="desc">Ask about any customer across Subscription Revenue, Support Cases & Sales Pipeline.</div>
-  <div style="padding:6px 10px;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0;">
-    <div style="font-size:7px;color:#64748b;margin-bottom:4px;font-weight:500;">Choose your data source:</div>
-    <div style="display:flex;gap:4px;">
-      <button onclick="setMode('kpi')" id="modeKpi" style="flex:1;padding:6px 8px;font-size:8px;border:2px solid #3b82f6;background:#3b82f6;color:white;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">📊 KPI Measures<br><span style='font-size:6px;opacity:0.8;'>MRR, Growth%, NRR%, GRR%<br>Matches dashboard</span></button>
-      <button onclick="setMode('dwh')" id="modeDwh" style="flex:1;padding:6px 8px;font-size:8px;border:2px solid #e2e8f0;background:white;color:#475569;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">📋 DWH Tables<br><span style='font-size:6px;opacity:0.7;'>Raw DKK BR revenue<br>From fact tables</span></button>
-      <button onclick="setMode('both')" id="modeAll" style="flex:1;padding:6px 8px;font-size:8px;border:2px solid #e2e8f0;background:white;color:#475569;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">🔄 Both<br><span style='font-size:6px;opacity:0.7;'>KPI + DWH combined<br>Full 360 view</span></button>
-    </div>
+  <div style="padding:4px 10px;display:flex;gap:3px;align-items:center;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0;">
+    <span style="font-size:7px;color:#94a3b8;margin-right:2px;">Source:</span>
+    <button onclick="setMode('kpi')" id="modeKpi" style="padding:3px 8px;font-size:7px;border:1px solid #3b82f6;background:#3b82f6;color:white;border-radius:10px;cursor:pointer;font-family:inherit;">KPI Measures</button>
+    <button onclick="setMode('dwh')" id="modeDwh" style="padding:3px 8px;font-size:7px;border:1px solid #e2e8f0;background:white;color:#475569;border-radius:10px;cursor:pointer;font-family:inherit;">DWH Tables</button>
+    <button onclick="setMode('both')" id="modeAll" style="padding:3px 8px;font-size:7px;border:1px solid #e2e8f0;background:white;color:#475569;border-radius:10px;cursor:pointer;font-family:inherit;">Both</button>
   </div>
   <div class="api-bar">
     <label>Key:</label>
@@ -256,9 +254,6 @@ function setMode(m){
   document.getElementById('modeKpi').style.color=m==='kpi'?'white':'#475569';
   document.getElementById('modeKpi').style.borderColor=m==='kpi'?'#3b82f6':'#e2e8f0';
   lsSet('c360_mode',m);
-  // Show mode change notification in chat
-  var label = m==='kpi'?'📊 KPI Measures (matches dashboard)':m==='dwh'?'📋 DWH Raw Tables (fact table data)':'🔄 Both KPI + DWH combined';
-  addMessage('ai','Data source set to: **'+label+'**\n\nAsk me about any customer now.');
 }
 document.addEventListener('DOMContentLoaded',function(){var s=lsGet('c360_mode');if(s){window.dataMode=s;
   document.getElementById('modeAll').style.background=s==='both'?'#3b82f6':'white';
