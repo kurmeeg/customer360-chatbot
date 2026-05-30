@@ -188,12 +188,12 @@
   </div>
   <div class="chat-area" id="chatArea">
     <div class="suggestions" id="suggestionsBlock">
-      <button class="suggestion" onclick="askSuggestion(this)">Region Hovedstaden — full 360 view</button>
-      <button class="suggestion" onclick="askSuggestion(this)">What is Coop Norge's MRR and Growth%?</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Compare Esbjerg Kommune KPIs vs revenue</button>
-      <button class="suggestion" onclick="askSuggestion(this)">How many cases does Aalborg Kommune have?</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Ejerkredsen Øs Indsigt growth story</button>
-      <button class="suggestion" onclick="askSuggestion(this)">Which customers have the highest ARR Growth%?</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Region Hovedstaden 202602</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Coop Norge Sa 202602</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Esbjerg Kommune 202603</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Aalborg Kommune 202601</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Ejerkredsen Øs Indsigt 202604</button>
+      <button class="suggestion" onclick="askSuggestion(this)">Region Midtjylland 202602</button>
     </div>
   </div>
   <div class="footer">AI-generated content may have mistakes. Always verify with the dashboard visuals.</div>
@@ -372,15 +372,16 @@ function findCustomerData(query) {
         if(d.r!==undefined) ctx += ` | GRR: ${d.r}%`;
         ctx += '\n';
       } else {
+        // No specific month - show last 4 months so user can find their period
         const keys = Object.keys(MONTHLY_KPI[name]).sort();
-        const latest = keys[keys.length-1];
-        const d = MONTHLY_KPI[name][latest];
-        ctx += `\n**KPI latest (${latest}):**\n`;
-        ctx += `MRR: ${d.m.toLocaleString()} DKK`;
-        if(d.g!==undefined) ctx += ` | Growth: ${d.g}%`;
-        if(d.n!==undefined) ctx += ` | NRR: ${d.n}%`;
-        if(d.r!==undefined) ctx += ` | GRR: ${d.r}%`;
-        ctx += '\n';
+        const recent = keys.slice(-4);
+        ctx += `\n**KPI (recent months — specify YYYYMM for exact match):**\n`;
+        ctx += `| Month | MRR (DKK) | Growth% | NRR% | GRR% |\n`;
+        recent.forEach(k => {
+          const d = MONTHLY_KPI[name][k];
+          ctx += `| ${k} | ${d.m.toLocaleString()} | ${d.g!==undefined?d.g:'-'} | ${d.n!==undefined?d.n:'-'} | ${d.r!==undefined?d.r:'-'} |\n`;
+        });
+        ctx += `Tip: Ask with a specific month like "${name} 202602" for exact dashboard match.\n`;
       }
     } else if (mode==='kpi'||mode==='both') {
       const k = c[7];
@@ -400,9 +401,12 @@ function findCustomerData(query) {
       ctx += '\n';
     } else if (typeof MONTHLY_CS!=='undefined' && MONTHLY_CS[name]) {
       const csKeys = Object.keys(MONTHLY_CS[name]).sort();
-      const lat = csKeys[csKeys.length-1];
-      const csm = MONTHLY_CS[name][lat];
-      ctx += `\n**CASES latest (${lat}):**\nOpened: ${csm.o} | Closed: ${csm.c}\n`;
+      const recentCS = csKeys.slice(-4);
+      ctx += `\n**CASES (recent months):**\n| Month | Opened | Closed |\n`;
+      recentCS.forEach(k => {
+        const csm = MONTHLY_CS[name][k];
+        ctx += `| ${k} | ${csm.o} | ${csm.c} |\n`;
+      });
     }
     ctx += `\n**PIPELINE:** BU level — refer to ${c[2]} BU.\n`;
   });
