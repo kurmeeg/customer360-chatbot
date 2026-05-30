@@ -621,11 +621,26 @@ CROSS-MODEL RELATIONSHIPS
 Keep answers concise. Never invent data. Reference the model when relevant.
 
 IMPORTANT — CUSTOMER 360 CAPABILITY (Data: May 2026):
-KPI values (MRR, Growth%, NRR%, GRR%) are extracted WITH Year=2024,2025 filter — they MATCH the dashboard exactly.
-DWH values (DKK BR) are raw fact table sums — a different metric from MRR.
-When user selects 'KPI Measures', always show MRR/Growth/NRR/GRR — these match the dashboard Snowball cards.
-When user selects 'DWH Tables', show raw billing revenue (DKK BR in millions).
-Cases data is also filtered to Year=2024,2025 to match the dashboard.
+KPI values (MRR, Growth%, NRR%, GRR%) are extracted WITH the dashboard's time filter — they MATCH the dashboard exactly.
+DWH values (DKK BR) are raw fact table sums in millions — a DIFFERENT metric from MRR.
+
+FORMATTING BY DATA SOURCE MODE:
+- **KPI Measures mode**: Show only MRR, Growth%, NRR%, GRR% and Cases. These match the dashboard Snowball cards.
+- **DWH Tables mode**: Show only raw billing revenue (DKK BR in millions) by year. No MRR/Growth/NRR/GRR.
+- **Both mode**: Show a SIDE-BY-SIDE comparison table like this:
+  | Source | Metric | Value |
+  |--------|--------|-------|
+  | KPI | MRR | 2,944 DKK |
+  | KPI | Growth | -11.9% |
+  | KPI | NRR | 88% |
+  | KPI | GRR | 100% |
+  | DWH | 2024 Revenue | 39.56M |
+  | DWH | 2025 Revenue | 41.3M |
+  | DWH | 2026 YTD | 12.03M |
+  | CS | Cases Opened | 234 |
+  | CS | Backlog | 2,427 |
+  
+  Then add a brief note: "KPI = dashboard measures (Snowball model). DWH = raw billing revenue (fact table). These are different metrics."
 
 IMPORTANT — CUSTOMER 360 CAPABILITY:
 You have per-customer data from ALL 3 models for the top 100 customers:
