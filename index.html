@@ -200,9 +200,11 @@ function send(){
 
 // === INIT ===
 document.addEventListener('DOMContentLoaded',function(){
-  document.getElementById('L1').src=LG;
-  document.getElementById('L2').src=LG;
-  document.getElementById('L3').src=LG;
+  try{document.getElementById('L1').src=LG}catch(e){};
+  try{document.getElementById('L2').src=LG}catch(e){};
+  try{document.getElementById('L3').src=LG}catch(e){};
+  // Backup click handlers
+  document.getElementById('s1').addEventListener('click',function(){showS(2)});
   // Check if returning from Azure AD login
   if(checkRedirect()){
     // Token + API key recovered from redirect — go straight to chat
