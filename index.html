@@ -9,29 +9,55 @@
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
-  .collapsed{height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;cursor:pointer}
-  .collapsed:hover .fab{transform:scale(1.08)}
-  .collapsed.hidden{display:none}
+
+  .screen{height:100%;width:100%;display:none;flex-direction:column}
+  .screen.active{display:flex}
+
+  /* Screen 1: Collapsed */
+  #screen1{align-items:center;justify-content:center;cursor:pointer;background:#fff}
+  #screen1:hover .fab{transform:scale(1.08)}
   .fab{width:50px;height:50px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(59,130,246,0.35);transition:transform 0.2s}
   .fab img{width:28px;height:28px;object-fit:contain;border-radius:5px}
   .fab-label{margin-top:6px;font-size:10px;color:#3b5a60;font-weight:500}
-  .expanded{height:100%;width:100%;display:none;flex-direction:column;background:#fff}
-  .expanded.active{display:flex}
+
+  /* Screen 2: Login */
+  #screen2{align-items:center;justify-content:center;background:#fff;padding:20px}
+  .login-card{width:100%;max-width:320px;text-align:center}
+  .login-logo{width:48px;height:48px;border-radius:12px;margin:0 auto 10px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center}
+  .login-logo img{width:26px;height:26px;border-radius:5px}
+  .login-title{font-size:14px;font-weight:600;color:#1e293b;margin-bottom:3px}
+  .login-sub{font-size:9px;color:#3b82f6;font-weight:500;margin-bottom:12px}
+  .login-desc{font-size:9px;color:#64748b;margin-bottom:16px;line-height:1.4}
+  .login-section{margin-bottom:12px;text-align:left}
+  .login-section label{font-size:8px;color:#475569;font-weight:500;display:block;margin-bottom:4px}
+  .login-section input{width:100%;padding:6px 8px;font-size:9px;font-family:'JetBrains Mono',monospace;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;color:#334155}
+  .login-btn{width:100%;padding:8px;font-size:10px;font-weight:500;border:none;border-radius:8px;cursor:pointer;font-family:inherit;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .login-btn.ms{background:#0078d4;color:#fff}
+  .login-btn.ms:hover{background:#106ebe}
+  .login-btn.ms svg{width:14px;height:14px}
+  .login-btn.start{background:#3b82f6;color:#fff}
+  .login-btn.start:hover{background:#2563eb}
+  .login-btn.start:disabled{background:#94a3b8;cursor:not-allowed}
+  .login-status{font-size:8px;margin:6px 0;min-height:16px}
+  .login-status.ok{color:#22c55e}
+  .login-status.err{color:#ef4444}
+  .login-divider{font-size:8px;color:#94a3b8;margin:10px 0;position:relative;text-align:center}
+  .login-divider::before,.login-divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:#e2e8f0}
+  .login-divider::before{left:0}
+  .login-divider::after{right:0}
+  .login-back{font-size:8px;color:#94a3b8;cursor:pointer;margin-top:8px;border:none;background:none;font-family:inherit}
+  .login-back:hover{color:#64748b}
+  .check{color:#22c55e;font-weight:600}
+
+  /* Screen 3: Chat */
   .hdr{padding:6px 8px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(59,90,96,0.2);background:rgba(255,255,255,0.5);flex-shrink:0}
-  .hdr img{width:30px;height:30px;border-radius:8px}
+  .hdr img{width:24px;height:24px;border-radius:6px}
   .hdr-txt h1{font-size:10px;font-weight:600;color:#1e293b;line-height:1.2}
   .hdr-txt p{font-size:7px;color:#3b82f6;font-weight:500}
   .btn-min{margin-left:auto;background:none;border:none;font-size:14px;cursor:pointer;color:#94a3b8;padding:2px 4px}
-  .desc{padding:4px 10px;font-size:8px;color:#475569;line-height:1.35;border-bottom:1px solid rgba(59,90,96,0.12);background:rgba(255,255,255,0.3);flex-shrink:0}
-  .auth-bar{padding:6px 10px;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0;display:flex;flex-direction:column;gap:4px}
-  .auth-row{display:flex;align-items:center;gap:4px}
-  .auth-row label{font-size:7px;color:#64748b;white-space:nowrap}
-  .auth-row input{flex:1;padding:2px 5px;font-size:7px;font-family:'JetBrains Mono',monospace;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafc;color:#334155}
-  .auth-row button,.auth-btn{padding:2px 8px;font-size:7px;font-weight:500;background:#3b82f6;color:#fff;border:none;border-radius:4px;cursor:pointer;font-family:inherit}
-  .auth-btn.ms{background:#0078d4;display:flex;align-items:center;gap:4px;padding:4px 10px;font-size:8px}
-  .auth-btn.ms svg{width:12px;height:12px}
-  .auth-status{font-size:7px;color:#22c55e;display:none}
-  .auth-status.error{color:#ef4444}
+  .live-badge{display:inline-block;background:#22c55e;color:#fff;font-size:6px;padding:1px 4px;border-radius:3px;margin-left:4px;font-weight:500}
+  .user-badge{font-size:6px;color:#64748b;margin-left:auto;margin-right:4px}
+  .desc{padding:4px 10px;font-size:8px;color:#475569;line-height:1.35;border-bottom:1px solid rgba(59,90,96,0.12);flex-shrink:0}
   .mode-bar{padding:4px 10px;display:flex;gap:3px;align-items:center;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0}
   .mode-bar span{font-size:7px;color:#94a3b8;margin-right:2px}
   .mode-btn{padding:3px 8px;font-size:7px;border:1px solid #e2e8f0;background:#fff;color:#475569;border-radius:10px;cursor:pointer;font-family:inherit}
@@ -60,40 +86,57 @@
   .input-bar button{width:26px;height:26px;background:#3b82f6;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .input-bar button svg{width:12px;height:12px;fill:#fff}
   .footer{padding:3px 10px;font-size:6px;color:#94a3b8;text-align:center;border-top:1px solid rgba(59,90,96,0.08);flex-shrink:0}
-  .live-badge{display:inline-block;background:#22c55e;color:#fff;font-size:6px;padding:1px 4px;border-radius:3px;margin-left:4px;font-weight:500}
 </style>
 </head>
 <body>
 
-<div class="collapsed" id="collapsedView" onclick="expandChat()">
-  <div class="fab"><img src="data:image/png;base64,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" alt="EG"/></div>
+<!-- SCREEN 1: Collapsed EG Logo -->
+<div class="screen active" id="screen1" onclick="showScreen(2)">
+  <div class="fab"><img id="logo1" alt="EG"/></div>
   <div class="fab-label">Ask AI</div>
 </div>
 
-<div class="expanded" id="expandedView">
+<!-- SCREEN 2: Login -->
+<div class="screen" id="screen2">
+  <div class="login-card">
+    <div class="login-logo"><img id="logo2" alt="EG" style="width:26px;height:26px;border-radius:5px"/></div>
+    <div class="login-title">Customer 360 – Ask AI</div>
+    <div class="login-sub">Engage & Amplify</div>
+    <div class="login-desc">Sign in to query live data from the Power BI model. Enter your AI key for natural language responses.</div>
+
+    <div class="login-section">
+      <label>Step 1 — Connect to Power BI</label>
+      <button class="login-btn ms" id="btnMs" onclick="signIn()">
+        <svg viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Sign in with Microsoft
+      </button>
+      <div class="login-status" id="msStatus"></div>
+    </div>
+
+    <div class="login-section">
+      <label>Step 2 — AI Key (Anthropic)</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." oninput="checkReady()"/>
+      <div class="login-status" id="keyStatus"></div>
+    </div>
+
+    <button class="login-btn start" id="btnStart" onclick="showScreen(3)" disabled>Open Chatbot</button>
+
+    <button class="login-back" onclick="showScreen(1)">← Back</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: Chat -->
+<div class="screen" id="screen3">
   <div class="hdr">
-    <img src="data:image/png;base64,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" alt="EG" style="width:24px;height:24px;border-radius:6px"/>
+    <img id="logo3" alt="EG" style="width:24px;height:24px;border-radius:6px"/>
     <div class="hdr-txt">
       <h1>Customer 360 – Ask AI <span class="live-badge">LIVE</span></h1>
       <p>Engage & Amplify</p>
     </div>
-    <button class="btn-min" onclick="collapseChat()">✕</button>
+    <span class="user-badge" id="userBadge"></span>
+    <button class="btn-min" onclick="showScreen(1)">✕</button>
   </div>
   <div class="desc">Ask about any customer — data is queried live from Power BI.</div>
-  <div class="auth-bar" id="authBar">
-    <div class="auth-row">
-      <button class="auth-btn ms" id="btnSignIn" onclick="signIn()">
-        <svg viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
-        Sign in with Microsoft
-      </button>
-      <span class="auth-status" id="authStatus"></span>
-    </div>
-    <div class="auth-row">
-      <label>AI Key:</label>
-      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-      <button onclick="saveApiKey()">Save</button>
-    </div>
-  </div>
   <div class="mode-bar">
     <span>Source:</span>
     <button class="mode-btn active" id="modeKpi" onclick="setMode('kpi')">KPI Measures</button>
@@ -127,399 +170,155 @@ const CONFIG = {
 };
 
 // ======== STATE ========
-let API_KEY = '', conversationHistory = [], isLoading = false;
-let pbiToken = null, msalInstance = null;
-window.dataMode = 'kpi';
-window._lastCustomer = null;
-window._lastYYYYMM = null;
+let API_KEY='', conversationHistory=[], isLoading=false;
+let pbiToken=null, msalInstance=null;
+window.dataMode='kpi';
+window._lastCustomer=null;
 
-// ======== MSAL INIT ========
+// ======== SCREEN NAVIGATION ========
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen'+n).classList.add('active');
+}
+
+// ======== MSAL ========
 async function initMsal() {
   try {
-    if (typeof msal === 'undefined') {
-      showAuthStatus('MSAL library not loaded. Check internet connection.', true);
-      return;
-    }
-    const msalConfig = {
-      auth: {
-        clientId: CONFIG.clientId,
-        authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-        redirectUri: CONFIG.redirectUri
-      },
-      cache: { cacheLocation: 'localStorage' }
-    };
-    msalInstance = new msal.PublicClientApplication(msalConfig);
-    // v2.x requires initialize() before use
-    if (msalInstance.initialize) await msalInstance.initialize();
-    // Check if already signed in
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      msalInstance.setActiveAccount(accounts[0]);
-      await acquireTokenSilent();
-    }
-  } catch(err) {
-    showAuthStatus('MSAL init error: ' + err.message, true);
-    console.error('MSAL init:', err);
-  }
+    if(typeof msal==='undefined'){document.getElementById('msStatus').textContent='MSAL library not loaded';document.getElementById('msStatus').className='login-status err';return}
+    msalInstance = new msal.PublicClientApplication({
+      auth:{clientId:CONFIG.clientId,authority:`https://login.microsoftonline.com/${CONFIG.tenantId}`,redirectUri:CONFIG.redirectUri},
+      cache:{cacheLocation:'localStorage'}
+    });
+    if(msalInstance.initialize) await msalInstance.initialize();
+    const accounts=msalInstance.getAllAccounts();
+    if(accounts.length>0){msalInstance.setActiveAccount(accounts[0]);await acquireTokenSilent()}
+  }catch(e){document.getElementById('msStatus').textContent='Init error: '+e.message;document.getElementById('msStatus').className='login-status err'}
 }
 
 async function signIn() {
-  if (!msalInstance) {
-    await initMsal();
-    if (!msalInstance) {
-      showAuthStatus('MSAL not available. Refresh the page.', true);
-      return;
-    }
-  }
-  try {
-    const resp = await msalInstance.loginPopup({ scopes: CONFIG.scopes });
+  if(!msalInstance){await initMsal();if(!msalInstance)return}
+  try{
+    const resp=await msalInstance.loginPopup({scopes:CONFIG.scopes});
     msalInstance.setActiveAccount(resp.account);
     await acquireTokenSilent();
-  } catch (err) {
-    showAuthStatus('Sign-in failed: ' + err.message, true);
-    console.error('Sign-in:', err);
+  }catch(e){document.getElementById('msStatus').textContent='Failed: '+e.message;document.getElementById('msStatus').className='login-status err'}
+}
+
+async function acquireTokenSilent(){
+  try{
+    const resp=await msalInstance.acquireTokenSilent({scopes:CONFIG.scopes,account:msalInstance.getActiveAccount()});
+    pbiToken=resp.accessToken;
+    const name=msalInstance.getActiveAccount().name||'User';
+    document.getElementById('msStatus').innerHTML='<span class="check">✓</span> Signed in as '+name;
+    document.getElementById('msStatus').className='login-status ok';
+    document.getElementById('btnMs').innerHTML='✓ '+name;
+    document.getElementById('btnMs').style.background='#22c55e';
+    document.getElementById('userBadge').textContent=name;
+    checkReady();
+  }catch(e){
+    try{const resp=await msalInstance.acquireTokenPopup({scopes:CONFIG.scopes});pbiToken=resp.accessToken;checkReady()}
+    catch(e2){document.getElementById('msStatus').textContent='Token error: '+e2.message;document.getElementById('msStatus').className='login-status err'}
   }
 }
 
-async function acquireTokenSilent() {
-  try {
-    const resp = await msalInstance.acquireTokenSilent({
-      scopes: CONFIG.scopes,
-      account: msalInstance.getActiveAccount()
-    });
-    pbiToken = resp.accessToken;
-    const name = msalInstance.getActiveAccount().name || 'User';
-    showAuthStatus('✓ Signed in as ' + name);
-    document.getElementById('btnSignIn').textContent = '✓ ' + name;
-    document.getElementById('btnSignIn').style.background = '#22c55e';
-  } catch (err) {
-    // Fallback to popup
-    try {
-      const resp = await msalInstance.acquireTokenPopup({ scopes: CONFIG.scopes });
-      pbiToken = resp.accessToken;
-      showAuthStatus('✓ Signed in');
-    } catch (e) {
-      showAuthStatus('Token error: ' + e.message, true);
-    }
-  }
-}
-
-function showAuthStatus(msg, isError) {
-  const el = document.getElementById('authStatus');
-  el.textContent = msg;
-  el.style.display = 'inline';
-  el.className = 'auth-status' + (isError ? ' error' : '');
+function checkReady(){
+  const key=document.getElementById('apiKeyInput').value.trim();
+  if(key)API_KEY=key;
+  const ready=pbiToken&&API_KEY;
+  document.getElementById('btnStart').disabled=!ready;
+  if(API_KEY){document.getElementById('keyStatus').innerHTML='<span class="check">✓</span> Key saved';document.getElementById('keyStatus').className='login-status ok'}
+  if(ready)try{localStorage.setItem('c360_apikey',API_KEY)}catch(e){}
 }
 
 // ======== POWER BI REST API ========
-async function executeDax(daxQuery) {
-  if (!pbiToken) {
-    await acquireTokenSilent();
-    if (!pbiToken) throw new Error('Not signed in to Power BI');
-  }
-  const url = `https://api.powerbi.com/v1.0/myorg/groups/${CONFIG.workspaceId}/datasets/${CONFIG.datasetId}/executeQueries`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + pbiToken,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      queries: [{ query: daxQuery }],
-      serializerSettings: { includeNulls: true }
-    })
-  });
-  if (resp.status === 401) {
-    pbiToken = null;
-    await acquireTokenSilent();
-    throw new Error('Token expired — please try again');
-  }
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error('PBI API error: ' + (err?.error?.message || resp.status));
-  }
-  const data = await resp.json();
-  return data.results[0].tables[0].rows;
+async function executeDax(q){
+  if(!pbiToken){await acquireTokenSilent();if(!pbiToken)throw new Error('Not signed in')}
+  const url=`https://api.powerbi.com/v1.0/myorg/groups/${CONFIG.workspaceId}/datasets/${CONFIG.datasetId}/executeQueries`;
+  const r=await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+pbiToken,'Content-Type':'application/json'},body:JSON.stringify({queries:[{query:q}],serializerSettings:{includeNulls:true}})});
+  if(r.status===401){pbiToken=null;await acquireTokenSilent();throw new Error('Token expired — try again')}
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error('PBI: '+(e?.error?.message||r.status))}
+  const d=await r.json();return d.results[0].tables[0].rows;
 }
 
-// ======== DAX QUERY BUILDERS ========
-function buildKpiQuery(customer, yyyymm) {
-  const custFilter = `'SB_FactCustomer'[Account Name]="${customer}"`;
-  const timeFilter = yyyymm ? `, 'SB_DimDate'[YYYYMM]="${yyyymm}"` : '';
-  return `EVALUATE ROW(
-    "MRR", ROUND(CALCULATE([SB_MRR], ${custFilter}${timeFilter}),0),
-    "Growth", ROUND(CALCULATE([SB_Growth_test]*100, ${custFilter}${timeFilter}),1),
-    "NRR", ROUND(CALCULATE([SB_NRR_test]*100, ${custFilter}${timeFilter}),1),
-    "GRR", ROUND(CALCULATE([SB_GRR_test]*100, ${custFilter}${timeFilter}),1)
-  )`;
-}
-
-function buildCsQuery(customer, yyyymm) {
-  const custFilter = `'CS_datamart dimAccount'[Name]="${customer}"`;
-  const timeFilter = yyyymm ? `, 'CS_datamart dimTime'[YYYYMM]="${yyyymm}"` : '';
-  return `EVALUATE ROW(
-    "Opened", CALCULATE([CS_Cases], ${custFilter}${timeFilter}),
-    "Closed", CALCULATE([CS_Closed Cases1], ${custFilter}${timeFilter}),
-    "Backlog", CALCULATE([CS_Backlog - Monthly Reporting], ${custFilter}${timeFilter})
-  )`;
-}
-
-function buildDwhQuery(customer) {
-  const f = `'SB_FactCustomer'[Account Name]="${customer}"`;
-  return `EVALUATE ROW(
-    "Y24", ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]), ${f}, YEAR('SB_FactCustomer'[Period])=2024),2),
-    "Y25", ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]), ${f}, YEAR('SB_FactCustomer'[Period])=2025),2),
-    "Y26", ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]), ${f}, YEAR('SB_FactCustomer'[Period])=2026),2)
-  )`;
-}
-
-function buildInfoQuery(customer) {
-  return `EVALUATE TOPN(1, FILTER(SUMMARIZE('SB_FactCustomer', 'SB_FactCustomer'[Account Name], 'SB_FactCustomer'[BU], 'SB_FactCustomer'[Account Country]), 'SB_FactCustomer'[Account Name]="${customer}"))`;
-}
+function buildKpiQ(c,m){const f=`'SB_FactCustomer'[Account Name]="${c}"`;const t=m?`,'SB_DimDate'[YYYYMM]="${m}"`:'';return `EVALUATE ROW("MRR",ROUND(CALCULATE([SB_MRR],${f}${t}),0),"Growth",ROUND(CALCULATE([SB_Growth_test]*100,${f}${t}),1),"NRR",ROUND(CALCULATE([SB_NRR_test]*100,${f}${t}),1),"GRR",ROUND(CALCULATE([SB_GRR_test]*100,${f}${t}),1))`}
+function buildCsQ(c,m){const f=`'CS_datamart dimAccount'[Name]="${c}"`;const t=m?`,'CS_datamart dimTime'[YYYYMM]="${m}"`:'';return `EVALUATE ROW("Opened",CALCULATE([CS_Cases],${f}${t}),"Closed",CALCULATE([CS_Closed Cases1],${f}${t}),"Backlog",CALCULATE([CS_Backlog - Monthly Reporting],${f}${t}))`}
+function buildDwhQ(c){const f=`'SB_FactCustomer'[Account Name]="${c}"`;return `EVALUATE ROW("Y24",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]),${f},YEAR('SB_FactCustomer'[Period])=2024),2),"Y25",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]),${f},YEAR('SB_FactCustomer'[Period])=2025),2),"Y26",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]),${f},YEAR('SB_FactCustomer'[Period])=2026),2))`}
+function buildInfoQ(c){return `EVALUATE TOPN(1,FILTER(SUMMARIZE('SB_FactCustomer','SB_FactCustomer'[Account Name],'SB_FactCustomer'[BU],'SB_FactCustomer'[Account Country]),'SB_FactCustomer'[Account Name]="${c}"))`}
 
 // ======== EXTRACT CUSTOMER + YYYYMM ========
-function extractParams(query) {
-  const q = query.toLowerCase().normalize('NFC');
-  let yyyymm = null;
-  const ymMatch = q.match(/\b(2024|2025|2026)(0[1-9]|1[0-2])\b/);
-  if (ymMatch) yyyymm = ymMatch[0];
-  if (!yyyymm) {
-    const months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12',january:'01',february:'02',march:'03',april:'04',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12'};
-    for (const [mName, mNum] of Object.entries(months)) {
-      const p1 = q.match(new RegExp(mName+'\\s*(2024|2025|2026)'));
-      const p2 = q.match(new RegExp('(2024|2025|2026)\\s*'+mName));
-      if (p1) { yyyymm = p1[1] + mNum; break; }
-      if (p2) { yyyymm = p2[1] + mNum; break; }
-    }
-  }
-  // Extract customer — try to find a known pattern or use any capitalized words
-  let customer = null;
-  // Remove the YYYYMM part from query for cleaner matching
-  let cleanQ = query.replace(/\b\d{6}\b/g, '').replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s*(2024|2025|2026)\b/gi, '').replace(/\b(2024|2025|2026)\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\b/gi, '').trim();
-  // The remaining text is likely the customer name
-  if (cleanQ.length > 2) customer = cleanQ.replace(/^(show|give|tell|what|how|me|is|about|for|the|of|in|data|everything|full|360|view)\s+/gi, '').replace(/\s+(data|kpi|revenue|mrr|growth|cases|info|details|for)$/gi, '').trim();
-  if (customer && customer.length < 3) customer = null;
-  // Fallback to last customer
-  if (!customer && window._lastCustomer) customer = window._lastCustomer;
-  if (customer) window._lastCustomer = customer;
-  if (yyyymm) window._lastYYYYMM = yyyymm;
-  else if (window._lastYYYYMM && !customer) yyyymm = window._lastYYYYMM;
-  return { customer, yyyymm };
+function extractParams(query){
+  const q=query.toLowerCase().normalize('NFC');
+  let yyyymm=null;
+  const ym=q.match(/\b(2024|2025|2026)(0[1-9]|1[0-2])\b/);
+  if(ym)yyyymm=ym[0];
+  if(!yyyymm){const ms={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12',january:'01',february:'02',march:'03',april:'04',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12'};for(const[n,v]of Object.entries(ms)){const p1=q.match(new RegExp(n+'\\s*(2024|2025|2026)'));const p2=q.match(new RegExp('(2024|2025|2026)\\s*'+n));if(p1){yyyymm=p1[1]+v;break}if(p2){yyyymm=p2[1]+v;break}}}
+  let cust=null;
+  let clean=query.replace(/\b\d{6}\b/g,'').replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s*(2024|2025|2026)\b/gi,'').replace(/\b(2024|2025|2026)\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\b/gi,'').trim();
+  if(clean.length>2)cust=clean.replace(/^(show|give|tell|what|how|me|is|about|for|the|of|in|data|everything|full|360|view)\s+/gi,'').replace(/\s+(data|kpi|revenue|mrr|growth|cases|info|details|for)$/gi,'').trim();
+  if(cust&&cust.length<3)cust=null;
+  if(!cust&&window._lastCustomer)cust=window._lastCustomer;
+  if(cust)window._lastCustomer=cust;
+  return{customer:cust,yyyymm};
 }
 
-// ======== QUERY POWER BI + FORMAT ========
-async function queryPBI(customer, yyyymm) {
-  const mode = window.dataMode;
-  let results = {};
-  
-  // Get customer info
-  try {
-    const info = await executeDax(buildInfoQuery(customer));
-    if (info && info.length > 0) {
-      results.bu = info[0]["'SB_FactCustomer'[BU]"] || 'Unknown';
-      results.country = info[0]["'SB_FactCustomer'[Account Country]"] || 'Unknown';
-      results.exactName = info[0]["'SB_FactCustomer'[Account Name]"] || customer;
-    }
-  } catch(e) { results.bu = 'Unknown'; results.country = 'Unknown'; results.exactName = customer; }
-
-  // Get KPI data
-  if (mode === 'kpi' || mode === 'both') {
-    try {
-      const kpi = await executeDax(buildKpiQuery(results.exactName || customer, yyyymm));
-      if (kpi && kpi.length > 0) results.kpi = kpi[0];
-    } catch(e) { results.kpiError = e.message; }
-  }
-
-  // Get CS data
-  try {
-    const cs = await executeDax(buildCsQuery(results.exactName || customer, yyyymm));
-    if (cs && cs.length > 0) results.cs = cs[0];
-  } catch(e) { results.csError = e.message; }
-
-  // Get DWH data
-  if (mode === 'dwh' || mode === 'both') {
-    try {
-      const dwh = await executeDax(buildDwhQuery(results.exactName || customer));
-      if (dwh && dwh.length > 0) results.dwh = dwh[0];
-    } catch(e) { results.dwhError = e.message; }
-  }
-
-  return results;
+// ======== QUERY PBI + FORMAT ========
+async function queryPBI(customer,yyyymm){
+  const mode=window.dataMode;let r={};
+  try{const info=await executeDax(buildInfoQ(customer));if(info&&info.length>0){r.bu=info[0]["'SB_FactCustomer'[BU]"]||'Unknown';r.country=info[0]["'SB_FactCustomer'[Account Country]"]||'Unknown';r.exactName=info[0]["'SB_FactCustomer'[Account Name]"]||customer}}catch(e){r.bu='Unknown';r.country='Unknown';r.exactName=customer}
+  const name=r.exactName||customer;
+  if(mode==='kpi'||mode==='both'){try{const k=await executeDax(buildKpiQ(name,yyyymm));if(k&&k.length>0)r.kpi=k[0]}catch(e){r.kpiErr=e.message}}
+  try{const c=await executeDax(buildCsQ(name,yyyymm));if(c&&c.length>0)r.cs=c[0]}catch(e){r.csErr=e.message}
+  if(mode==='dwh'||mode==='both'){try{const d=await executeDax(buildDwhQ(name));if(d&&d.length>0)r.dwh=d[0]}catch(e){r.dwhErr=e.message}}
+  return r;
 }
 
-// ======== UI FUNCTIONS ========
-function expandChat() {
-  document.getElementById('collapsedView').classList.add('hidden');
-  document.getElementById('expandedView').classList.add('active');
-}
-function collapseChat() {
-  document.getElementById('expandedView').classList.remove('active');
-  document.getElementById('collapsedView').classList.remove('hidden');
-}
-
-function setMode(m) {
-  window.dataMode = m;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('mode' + m.charAt(0).toUpperCase() + m.slice(1)).classList.add('active');
-  // Fix ID mapping
-  if(m==='kpi') document.getElementById('modeKpi').classList.add('active');
-  if(m==='dwh') document.getElementById('modeDwh').classList.add('active');
-  if(m==='both') document.getElementById('modeBoth').classList.add('active');
-}
-
-function saveApiKey() {
-  API_KEY = document.getElementById('apiKeyInput').value.trim();
-  try { localStorage.setItem('c360_apikey', API_KEY); } catch(e) {}
-}
-
-function addMessage(role, text) {
-  const sb = document.getElementById('suggestionsBlock');
-  if (sb) sb.remove();
-  const container = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'msg ' + role;
-  const avi = document.createElement('div');
-  avi.className = 'msg-avi';
-  avi.textContent = role === 'ai' ? 'EG' : '👤';
-  const body = document.createElement('div');
-  body.className = 'msg-body';
-  body.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code>$1</code>').replace(/\n/g, '<br>');
-  div.appendChild(avi);
-  div.appendChild(body);
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-function addTyping() {
-  const container = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.id = 'typingIndicator';
-  div.innerHTML = '<div class="msg-avi">EG</div><div class="typing"><span></span><span></span><span></span></div>';
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-function removeTyping() {
-  const el = document.getElementById('typingIndicator');
-  if (el) el.remove();
-}
-
-function askSuggestion(el) {
-  document.getElementById('userInput').value = el.textContent;
-  sendMessage();
-}
+// ======== UI ========
+function setMode(m){window.dataMode=m;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mode'+m.charAt(0).toUpperCase()+m.slice(1)).classList.add('active')}
+function addMessage(role,text){const sb=document.getElementById('suggestionsBlock');if(sb)sb.remove();const c=document.getElementById('messages');const d=document.createElement('div');d.className='msg '+role;const a=document.createElement('div');a.className='msg-avi';a.textContent=role==='ai'?'EG':'👤';const b=document.createElement('div');b.className='msg-body';b.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/\n/g,'<br>');d.appendChild(a);d.appendChild(b);c.appendChild(d);c.scrollTop=c.scrollHeight}
+function addTyping(){const c=document.getElementById('messages');const d=document.createElement('div');d.className='msg ai';d.id='typingIndicator';d.innerHTML='<div class="msg-avi">EG</div><div class="typing"><span></span><span></span><span></span></div>';c.appendChild(d);c.scrollTop=c.scrollHeight}
+function removeTyping(){const e=document.getElementById('typingIndicator');if(e)e.remove()}
+function askSuggestion(el){document.getElementById('userInput').value=el.textContent;sendMessage()}
 
 // ======== SEND MESSAGE ========
-async function sendMessage() {
-  const input = document.getElementById('userInput');
-  const text = input.value.trim();
-  if (!text || isLoading) return;
-  input.value = '';
-  isLoading = true;
-  addMessage('user', text);
-  addTyping();
-
-  try {
-    // Check auth
-    if (!pbiToken) throw new Error('Please sign in with Microsoft first');
-    if (!API_KEY) throw new Error('Please enter your Anthropic API key');
-
-    // Extract customer + period
-    const { customer, yyyymm } = extractParams(text);
-    
-    let pbiData = null;
-    if (customer) {
-      // Query Power BI live
-      pbiData = await queryPBI(customer, yyyymm);
-    }
-
-    // Build system prompt
-    const mode = window.dataMode;
-    let systemPrompt = `You are the AI assistant for the Customer 360 dashboard at EG A/S. You answer questions using LIVE data from the Power BI model.
-
-The user asked: "${text}"
-Data mode: ${mode === 'kpi' ? 'KPI Measures' : mode === 'dwh' ? 'DWH Tables' : 'Both KPI + DWH'}`;
-
-    if (pbiData) {
-      systemPrompt += `\n\nLIVE DATA FROM POWER BI (just queried — this is the truth):`;
-      systemPrompt += `\nCustomer: ${pbiData.exactName || customer}`;
-      systemPrompt += `\nBU: ${pbiData.bu} | Country: ${pbiData.country}`;
-      if (yyyymm) systemPrompt += `\nPeriod: ${yyyymm}`;
-      
-      if (pbiData.kpi) {
-        const k = pbiData.kpi;
-        systemPrompt += `\n\nSB KPI MEASURES${yyyymm ? ' for ' + yyyymm : ''}:`;
-        systemPrompt += `\nMRR: ${k['[MRR]']} DKK`;
-        systemPrompt += `\nARR Growth: ${k['[Growth]']}%`;
-        systemPrompt += `\nNRR: ${k['[NRR]']}%`;
-        systemPrompt += `\nGRR: ${k['[GRR]']}%`;
-      }
-      if (pbiData.cs) {
-        const c = pbiData.cs;
-        systemPrompt += `\n\nCS CASES${yyyymm ? ' for ' + yyyymm : ''}:`;
-        systemPrompt += `\nOpened: ${c['[Opened]']}`;
-        systemPrompt += `\nClosed: ${c['[Closed]']}`;
-        systemPrompt += `\nBacklog: ${c['[Backlog]']}`;
-      }
-      if (pbiData.dwh) {
-        const d = pbiData.dwh;
-        systemPrompt += `\n\nDWH REVENUE (DKK BR millions):`;
-        systemPrompt += `\n2024: ${d['[Y24]']}M | 2025: ${d['[Y25]']}M | 2026 YTD: ${d['[Y26]']}M`;
-      }
-    } else {
-      systemPrompt += `\n\nNo specific customer was identified in the query. Help the user by suggesting they include a customer name and optionally a YYYYMM period.`;
-    }
-
-    systemPrompt += `\n\nFormat rules:
-- Present data clearly with tables where appropriate
-- If mode is 'Both', show a side-by-side comparison table
-- Add brief insights (1-2 sentences) after the data
-- If any value is null/blank, show "--"
-- Always mention this is LIVE data from Power BI`;
-
-    // Call Claude AI
-    conversationHistory.push({ role: 'user', content: text });
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        system: systemPrompt,
-        messages: conversationHistory.slice(-10)
-      })
-    });
-
+async function sendMessage(){
+  const input=document.getElementById('userInput');const text=input.value.trim();
+  if(!text||isLoading)return;input.value='';isLoading=true;
+  addMessage('user',text);addTyping();
+  try{
+    const{customer,yyyymm}=extractParams(text);
+    let pbiData=null;
+    if(customer)pbiData=await queryPBI(customer,yyyymm);
+    const mode=window.dataMode;
+    let sys=`You are the AI assistant for the Customer 360 dashboard at EG A/S. You answer questions using LIVE data from Power BI.\nData mode: ${mode==='kpi'?'KPI Measures':mode==='dwh'?'DWH Tables':'Both'}`;
+    if(pbiData){
+      sys+=`\n\nLIVE DATA FROM POWER BI:\nCustomer: ${pbiData.exactName||customer}\nBU: ${pbiData.bu} | Country: ${pbiData.country}`;
+      if(yyyymm)sys+=`\nPeriod: ${yyyymm}`;
+      if(pbiData.kpi){const k=pbiData.kpi;sys+=`\n\nSB KPI${yyyymm?' for '+yyyymm:''}:\nMRR: ${k['[MRR]']} DKK\nARR Growth: ${k['[Growth]']}%\nNRR: ${k['[NRR]']}%\nGRR: ${k['[GRR]']}%`}
+      if(pbiData.cs){const c=pbiData.cs;sys+=`\n\nCS CASES${yyyymm?' for '+yyyymm:''}:\nOpened: ${c['[Opened]']}\nClosed: ${c['[Closed]']}\nBacklog: ${c['[Backlog]']}`}
+      if(pbiData.dwh){const d=pbiData.dwh;sys+=`\n\nDWH REVENUE (DKK BR millions):\n2024: ${d['[Y24]']}M | 2025: ${d['[Y25]']}M | 2026 YTD: ${d['[Y26]']}M`}
+    }else{sys+='\n\nNo customer identified. Suggest including a customer name and YYYYMM period.'}
+    sys+=`\n\nFormat: Present data clearly. If Both mode, show side-by-side table. Add brief insights. Show "--" for null. Mention this is live data.`;
+    conversationHistory.push({role:'user',content:text});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,system:sys,messages:conversationHistory.slice(-10)})});
     removeTyping();
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      addMessage('ai', '❌ ' + (err?.error?.message || 'Error ' + resp.status));
-      conversationHistory.pop();
-    } else {
-      const data = await resp.json();
-      const reply = data.content.map(c => c.text || '').join('\n').trim();
-      addMessage('ai', reply);
-      conversationHistory.push({ role: 'assistant', content: reply });
-    }
-  } catch (err) {
-    removeTyping();
-    addMessage('ai', '❌ ' + err.message);
-  }
-  isLoading = false;
+    if(!resp.ok){const e=await resp.json().catch(()=>({}));addMessage('ai','❌ '+(e?.error?.message||'Error '+resp.status));conversationHistory.pop()}
+    else{const d=await resp.json();const reply=d.content.map(c=>c.text||'').join('\n').trim();addMessage('ai',reply);conversationHistory.push({role:'assistant',content:reply})}
+  }catch(e){removeTyping();addMessage('ai','❌ '+e.message)}
+  isLoading=false;
 }
 
 // ======== INIT ========
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded',async function(){
+  // Set logos
+  const logoSrc="data:image/png;base64,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";
+  document.getElementById('logo1').src=logoSrc;
+  document.getElementById('logo2').src=logoSrc;
+  document.getElementById('logo3').src=logoSrc;
+  // Init MSAL
   await initMsal();
   // Restore API key
-  try {
-    const saved = localStorage.getItem('c360_apikey');
-    if (saved) { API_KEY = saved; document.getElementById('apiKeyInput').value = saved; }
-  } catch(e) {}
-  // Add backup click handler
-  document.getElementById('collapsedView').addEventListener('click', expandChat);
+  try{const s=localStorage.getItem('c360_apikey');if(s){API_KEY=s;document.getElementById('apiKeyInput').value=s;checkReady()}}catch(e){}
+  // If already signed in + has key, go directly to chat
+  if(pbiToken&&API_KEY)showScreen(3);
 });
 </script>
-</body>
-</html>
