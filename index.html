@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Customer 360 – Ask AI (Live)</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-authentication-library-js/2.38.3/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
@@ -66,13 +66,13 @@
 <body>
 
 <div class="collapsed" id="collapsedView" onclick="expandChat()">
-  <div class="fab"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAArlBMVEVMaXH///8jb9D/AAD/AAD/AAD/AADyAADiAAD/AAAZZswAXMgAWscAW8cAXMgAXMf/AADhAADxAAD/AADGAAD/AAD/AAD/AAD/ERH/7u7/UVH/1NT/vr7/Rkb/dHT/oaH/ICD/ior/Zmb/MzP/4eH/j4//srL/bGz/Q0P/2Nj/Vlb/np7/JCT/hIT/wcH/TEz/e3v/NDT/Fhb/qKj/l5f/Nzf/HBz/Kir/5uYPMZWoAAAAGnRSTlMA7wMTxiKLrc1gcpbfuUcwWvSm6EqA1nTQ+HUAHYEAAAR7SURBVHja7NXpUuMwEATgGV/yfd+5c3Bfz/s/GFtOQiqJt8C/YMv9Q+UqfSOp5OXl5eXl5eXl/1dlprfmZ+R/akR+9rj4hwWT+PJx/Bep/+6++Hf6dZlFaf8pSsY//u1+uo6q7r+bQFl4/D84nHuDP9T8rOq+FDJ/ByuqJvNNWAIiB78uv1r77zU/0/W7d1XYfxcA1oLjhx/sT0b+aONh8cH+l/UdRbMJyDrABBV/eP23ypq3vO/e8BF4eCvq+oMLhYAaKtqVsMtgGv76Z+Lz8RCnvO/Y6CgpL+8lNJFUlUm2HA+Wf2FzbkJ3KR8ypfidQ3pqtH1CkuLRDmXnP/WT/V1HyTzHQBvB1/S7FvVc5Bfko/Ij8ZMT8PYJ+FxwmPmk9VNF3YkQiZYsEERFf1g/veCF+g0EQf86Sn4bP7AVRPN2X2BI6YLzifq7bDqD9WNUn4KCE+r4mFJ8P9i/1PlP8oal7tggCz+oP3/v33/H/O/ij+MNKFAVp0D/DjA0SaLywfWfBo/jcYemzB3hmgxfdhZ/wN/MvqjytLLhYA0Cr3YNzJ3UllHfk5/s3+19d97+K+hA/WiC48sMPvq7fpboVhwHwmxZbTqP3v4aK/7LsQVKA0j+2o0j7XxwWJF9Vy5MqIjL8SP+PgCvU1zx+8c/0S+omuxIhoH2P/TbsP+Rjb0eP+y/p4dJDjvuBmhuuKnEfGR3ioOVf1r/qdR8J9LwHnCYUVi/5f5S+qmuxKlIEPxkfG31U/a+S6TfXp/RiHnx5E5ufMh63+f3/WPw4+pWQ6B4I/ub+69J/97+4Ot6P3AcZ/c3B+/7D2+T+Xnx4/Mh/fPdh/0/tU7iH/oXNz3T1H9R+N/5qXf3tR/xOV/l0CMRN1sP6EHxmfjI0rH76R2UdR8o1DQCJ/cj9+pbiJ+VQ+M/2/I6TqDh4EJCYb4cfq+/6r8qexKkYAT/K/HeLH6l/In5V1F0nUiCId/B6PH/BocxT/QX5mPjovXi94Ah16J+1+1/VB3EP/WjZ/7D+36r6JCbgRfMnbfyVRR/6d3R+VndJIkbAVfnrdr6J+k8U9SB+sEBw18Pr2Pi76r7r/auon0lEiAhI4Efm7/qDn27IP4/S/yrqxwjEiPiD/af1Q/kTl0f618dh+0fi/8OqToMcY4bMv7w/uyCfrP+xvqvi7mMcGzC/s9xZUfmU9c/MT/a+NKuVjyP/0u/d17vF//F/YUl1Y1f7hB8dL8c+qHkSJLALeMj+fJbi5/M/+b0veH2q/73b+XxEYofkz8R9v8oeVj8K/PH7HLz3MqhXo+/cR59F/c/iHkSJVAX89y7av8j5V9S1XyxAooH7P9qPcz0//L6CXw=" alt="EG"/></div>
+  <div class="fab"><img src="data:image/png;base64,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" alt="EG"/></div>
   <div class="fab-label">Ask AI</div>
 </div>
 
 <div class="expanded" id="expandedView">
   <div class="hdr">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAArlBMVEVMaXH///8jb9D/AAD/AAD/AAD/AADyAADiAAD/AAAZZswAXMgAWscAW8cAXMgAXMf/AADhAADxAAD/AADGAAD/AAD/AAD/AAD/ERH/7u7/UVH/1NT/vr7/Rkb/dHT/oaH/ICD/ior/Zmb/MzP/4eH/j4//srL/bGz/Q0P/2Nj/Vlb/np7/JCT/hIT/wcH/TEz/e3v/NDT/Fhb/qKj/l5f/Nzf/HBz/Kir/5uYPMZWoAAAAGnRSTlMA7wMTxiKLrc1gcpbfuUcwWvSm6EqA1nTQ+HUAHYEAAAR7SURBVHja7NXpUuMwEATgGV/yfd+5c3Bfz/s/GFtOQiqJt8C/YMv9Q+UqfSOp5OXl5eXl5eXl/1dlprfmZ+R/akR+9rj4hwWT+PJx/Bep/+6++Hf6dZlFaf8pSsY//u1+uo6q7r+bQFl4/D84nHuDP9T8rOq+FDJ/ByuqJvNNWAIiB78uv1r77zU/0/W7d1XYfxcA1oLjhx/sT0b+aONh8cH+l/UdRbMJyDrABBV/eP23ypq3vO/e8BF4eCvq+oMLhYAaKtqVsMtgGv76Z+Lz8RCnvO/Y6CgpL+8lNJFUlUm2HA+Wf2FzbkJ3KR8ypfidQ3pqtH1CkuLRDmXnP/WT/V1HyTzHQBvB1/S7FvVc5Bfko/Ij8ZMT8PYJ+FxwmPmk9VNF3YkQiZYsEERFf1g/veCF+g0EQf86Sn4bP7AVRPN2X2BI6YLzifq7bDqD9WNUn4KCE+r4mFJ8P9i/1PlP8oal7tggCz+oP3/v33/H/O/ij+MNKFAVp0D/DjA0SaLywfWfBo/jcYemzB3hmgxfdhZ/wN/MvqjytLLhYA0Cr3YNzJ3UllHfk5/s3+19d97+K+hA/WiC48sMPvq7fpboVhwHwmxZbTqP3v4aK/7LsQVKA0j+2o0j7XxwWJF9Vy5MqIjL8SP+PgCvU1zx+8c/0S+omuxIhoH2P/TbsP+Rjb0eP+y/p4dJDjvuBmhuuKnEfGR3ioOVf1r/qdR8J9LwHnCYUVi/5f5S+qmuxKlIEPxkfG31U/a+S6TfXp/RiHnx5E5ufMh63+f3/WPw4+pWQ6B4I/ub+69J/97+4Ot6P3AcZ/c3B+/7D2+T+Xnx4/Mh/fPdh/0/tU7iH/oXNz3T1H9R+N/5qXf3tR/xOV/l0CMRN1sP6EHxmfjI0rH76R2UdR8o1DQCJ/cj9+pbiJ+VQ+M/2/I6TqDh4EJCYb4cfq+/6r8qexKkYAT/K/HeLH6l/In5V1F0nUiCId/B6PH/BocxT/QX5mPjovXi94Ah16J+1+1/VB3EP/WjZ/7D+36r6JCbgRfMnbfyVRR/6d3R+VndJIkbAVfnrdr6J+k8U9SB+sEBw18Pr2Pi76r7r/auon0lEiAhI4Efm7/qDn27IP4/S/yrqxwjEiPiD/af1Q/kTl0f618dh+0fi/8OqToMcY4bMv7w/uyCfrP+xvqvi7mMcGzC/s9xZUfmU9c/MT/a+NKuVjyP/0u/d17vF//F/YUl1Y1f7hB8dL8c+qHkSJLALeMj+fJbi5/M/+b0veH2q/73b+XxEYofkz8R9v8oeVj8K/PH7HLz3MqhXo+/cR59F/c/iHkSJVAX89y7av8j5V9S1XyxAooH7P9qPcz0//L6CXw==" alt="EG" style="width:24px;height:24px;border-radius:6px"/>
+    <img src="data:image/png;base64,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" alt="EG" style="width:24px;height:24px;border-radius:6px"/>
     <div class="hdr-txt">
       <h1>Customer 360 – Ask AI <span class="live-badge">LIVE</span></h1>
       <p>Engage & Amplify</p>
@@ -134,31 +134,50 @@ window._lastCustomer = null;
 window._lastYYYYMM = null;
 
 // ======== MSAL INIT ========
-function initMsal() {
-  const msalConfig = {
-    auth: {
-      clientId: CONFIG.clientId,
-      authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-      redirectUri: CONFIG.redirectUri
-    },
-    cache: { cacheLocation: 'localStorage' }
-  };
-  msalInstance = new msal.PublicClientApplication(msalConfig);
-  // Check if already signed in
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
-    msalInstance.setActiveAccount(accounts[0]);
-    acquireTokenSilent();
+async function initMsal() {
+  try {
+    if (typeof msal === 'undefined') {
+      showAuthStatus('MSAL library not loaded. Check internet connection.', true);
+      return;
+    }
+    const msalConfig = {
+      auth: {
+        clientId: CONFIG.clientId,
+        authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
+        redirectUri: CONFIG.redirectUri
+      },
+      cache: { cacheLocation: 'localStorage' }
+    };
+    msalInstance = new msal.PublicClientApplication(msalConfig);
+    // v2.x requires initialize() before use
+    if (msalInstance.initialize) await msalInstance.initialize();
+    // Check if already signed in
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      msalInstance.setActiveAccount(accounts[0]);
+      await acquireTokenSilent();
+    }
+  } catch(err) {
+    showAuthStatus('MSAL init error: ' + err.message, true);
+    console.error('MSAL init:', err);
   }
 }
 
 async function signIn() {
+  if (!msalInstance) {
+    await initMsal();
+    if (!msalInstance) {
+      showAuthStatus('MSAL not available. Refresh the page.', true);
+      return;
+    }
+  }
   try {
     const resp = await msalInstance.loginPopup({ scopes: CONFIG.scopes });
     msalInstance.setActiveAccount(resp.account);
     await acquireTokenSilent();
   } catch (err) {
     showAuthStatus('Sign-in failed: ' + err.message, true);
+    console.error('Sign-in:', err);
   }
 }
 
@@ -491,8 +510,8 @@ Data mode: ${mode === 'kpi' ? 'KPI Measures' : mode === 'dwh' ? 'DWH Tables' : '
 }
 
 // ======== INIT ========
-document.addEventListener('DOMContentLoaded', function() {
-  initMsal();
+document.addEventListener('DOMContentLoaded', async function() {
+  await initMsal();
   // Restore API key
   try {
     const saved = localStorage.getItem('c360_apikey');
