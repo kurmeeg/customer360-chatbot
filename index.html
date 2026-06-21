@@ -3,211 +3,373 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Customer 360 – Ask AI (Live)</title>
+<title>Customer 360 – Ask AI</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
-  .screen{height:100%;width:100%;display:none;flex-direction:column}.screen.active{display:flex}
-  #s1{align-items:center;justify-content:center;cursor:pointer}#s1:hover .fab{transform:scale(1.08)}
-  .fab{width:50px;height:50px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(59,130,246,0.35);transition:transform 0.2s}
-  .fab img{width:28px;height:28px;border-radius:5px}.fab-l{margin-top:6px;font-size:10px;color:#3b5a60;font-weight:500}
-  #s2{align-items:center;justify-content:center;padding:20px}
-  .lc{width:100%;max-width:320px;text-align:center}
-  .lc-i{width:48px;height:48px;border-radius:12px;margin:0 auto 10px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center}
-  .lc-i img{width:26px;height:26px;border-radius:5px}
-  .lc h2{font-size:14px;font-weight:600;color:#1e293b;margin-bottom:3px}
-  .lc .sub{font-size:9px;color:#3b82f6;font-weight:500;margin-bottom:12px}
-  .lc .dsc{font-size:9px;color:#64748b;margin-bottom:16px;line-height:1.4}
-  .ls{margin-bottom:12px;text-align:left}.ls label{font-size:8px;color:#475569;font-weight:500;display:block;margin-bottom:4px}
-  .ls input{width:100%;padding:6px 8px;font-size:9px;font-family:'JetBrains Mono',monospace;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc}
-  .lb{width:100%;padding:8px;font-size:10px;font-weight:500;border:none;border-radius:8px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px}
-  .lb.ms{background:#0078d4;color:#fff}.lb.go{background:#3b82f6;color:#fff}.lb.go:disabled{background:#94a3b8;cursor:not-allowed}
-  .st{font-size:8px;margin:6px 0;min-height:14px}.st.ok{color:#22c55e}.st.err{color:#ef4444}
-  .bk{font-size:8px;color:#94a3b8;cursor:pointer;margin-top:8px;border:none;background:none;font-family:inherit}
-  .hdr{padding:6px 8px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(59,90,96,0.2);flex-shrink:0}
-  .hdr img{width:24px;height:24px;border-radius:6px}.hdr h1{font-size:10px;font-weight:600;color:#1e293b}.hdr p{font-size:7px;color:#3b82f6;font-weight:500}
-  .bx{margin-left:auto;background:none;border:none;font-size:14px;cursor:pointer;color:#94a3b8}
-  .live{display:inline-block;background:#22c55e;color:#fff;font-size:6px;padding:1px 4px;border-radius:3px;margin-left:4px;font-weight:500}
-  .dsc2{padding:4px 10px;font-size:8px;color:#475569;border-bottom:1px solid rgba(59,90,96,0.12);flex-shrink:0}
-  .mb{padding:4px 10px;display:flex;gap:3px;align-items:center;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0}
-  .mb span{font-size:7px;color:#94a3b8;margin-right:2px}
-  .mt{padding:3px 8px;font-size:7px;border:1px solid #e2e8f0;background:#fff;color:#475569;border-radius:10px;cursor:pointer;font-family:inherit}
-  .mt.a{background:#3b82f6;color:#fff;border-color:#3b82f6}
-  .msgs{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
-  .msg{display:flex;gap:5px;max-width:95%}.msg.user{align-self:flex-end;flex-direction:row-reverse}
-  .ma{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:600;flex-shrink:0}
-  .msg.ai .ma{background:#3b82f6;color:#fff}.msg.user .ma{background:#e2e8f0;color:#475569}
-  .mv{padding:5px 7px;border-radius:8px;font-size:8px;line-height:1.45;word-wrap:break-word}
-  .msg.ai .mv{background:#f1f5f9;color:#1e293b;border-bottom-left-radius:2px}
-  .msg.user .mv{background:#3b82f6;color:#fff;border-bottom-right-radius:2px}
-  .mv strong{font-weight:600}
-  .tp{display:flex;gap:3px;padding:4px 7px}.tp span{width:4px;height:4px;background:#94a3b8;border-radius:50%;animation:bn 1.2s infinite}.tp span:nth-child(2){animation-delay:.2s}.tp span:nth-child(3){animation-delay:.4s}
-  @keyframes bn{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
-  .sg{display:block;width:100%;text-align:left;padding:6px 8px;font-size:8px;color:#475569;background:#fff;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-family:inherit;margin-bottom:4px}.sg:hover{border-color:#3b82f6}
-  .ib{display:flex;align-items:flex-end;gap:4px;padding:6px 8px;border-top:1px solid rgba(59,90,96,0.15);flex-shrink:0}
-  .ib textarea{flex:1;padding:5px 7px;font-size:8px;outline:none;resize:none;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;min-height:26px;max-height:80px;background:#f8fafc}
-  .ib button{width:26px;height:26px;background:#3b82f6;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .ib button svg{width:12px;height:12px;fill:#fff}
-  .ft{padding:3px 10px;font-size:6px;color:#94a3b8;text-align:center;border-top:1px solid rgba(59,90,96,0.08);flex-shrink:0}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#fff;overflow:hidden}
+.screen{height:100%;width:100%;display:none;flex-direction:column}
+.screen.active{display:flex}
+#s1{align-items:center;justify-content:center;cursor:pointer}
+#s1:hover .fab{transform:scale(1.08)}
+.fab{width:56px;height:56px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(59,130,246,0.35);transition:transform 0.2s}
+.fab img{width:32px;height:32px;border-radius:6px}
+.fab-l{margin-top:8px;font-size:11px;color:#3b5a60;font-weight:500}
+#s2{align-items:center;justify-content:center;padding:20px}
+.lc{width:100%;max-width:300px;text-align:center}
+.lc-i{width:52px;height:52px;border-radius:12px;margin:0 auto 12px}
+.lc-i img{width:52px;height:52px;border-radius:12px}
+.lc h2{font-size:15px;font-weight:600;color:#1e293b;margin-bottom:4px}
+.lc .sub{font-size:9px;color:#3b82f6;font-weight:500;margin-bottom:14px}
+.lc .desc{font-size:9px;color:#64748b;margin-bottom:18px;line-height:1.5}
+.ls{margin-bottom:14px;text-align:left}
+.ls label{font-size:8px;color:#475569;font-weight:500;display:block;margin-bottom:5px}
+.ls input{width:100%;padding:7px 10px;font-size:9px;font-family:'JetBrains Mono',monospace;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc}
+.btn{width:100%;padding:9px;font-size:10px;font-weight:500;border:none;border-radius:8px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px}
+.btn-ms{background:#0078d4;color:#fff}
+.btn-ms:hover{background:#106ebe}
+.st{font-size:8px;margin:6px 0;min-height:14px;color:#64748b}
+.bk{font-size:8px;color:#94a3b8;cursor:pointer;margin-top:10px;border:none;background:none;font-family:inherit}
+.hdr{padding:6px 8px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(59,90,96,0.2);flex-shrink:0}
+.hdr img{width:24px;height:24px;border-radius:6px}
+.hdr h1{font-size:10px;font-weight:600;color:#1e293b}
+.hdr p{font-size:7px;color:#3b82f6;font-weight:500}
+.bx{margin-left:auto;background:none;border:none;font-size:14px;cursor:pointer;color:#94a3b8}
+.live{display:inline-block;background:#22c55e;color:#fff;font-size:6px;padding:1px 4px;border-radius:3px;margin-left:4px}
+.dsc2{padding:4px 10px;font-size:8px;color:#475569;border-bottom:1px solid rgba(59,90,96,0.12);flex-shrink:0}
+.mb{padding:4px 10px;display:flex;gap:3px;align-items:center;border-bottom:1px solid rgba(59,90,96,0.1);flex-shrink:0}
+.mb span{font-size:7px;color:#94a3b8;margin-right:2px}
+.mt{padding:3px 8px;font-size:7px;border:1px solid #e2e8f0;background:#fff;color:#475569;border-radius:10px;cursor:pointer;font-family:inherit}
+.mt.a{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.msgs{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.msg{display:flex;gap:5px;max-width:95%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.ma{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:600;flex-shrink:0}
+.msg.ai .ma{background:#3b82f6;color:#fff}
+.msg.user .ma{background:#e2e8f0;color:#475569}
+.mv{padding:5px 7px;border-radius:8px;font-size:8px;line-height:1.45;word-wrap:break-word}
+.msg.ai .mv{background:#f1f5f9;color:#1e293b;border-bottom-left-radius:2px}
+.msg.user .mv{background:#3b82f6;color:#fff;border-bottom-right-radius:2px}
+.mv strong{font-weight:600}
+.tp{display:flex;gap:3px;padding:4px 7px}
+.tp span{width:4px;height:4px;background:#94a3b8;border-radius:50%;animation:bn 1.2s infinite}
+.tp span:nth-child(2){animation-delay:.2s}
+.tp span:nth-child(3){animation-delay:.4s}
+@keyframes bn{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
+.sg{display:block;width:100%;text-align:left;padding:6px 8px;font-size:8px;color:#475569;background:#fff;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-family:inherit;margin-bottom:4px}
+.sg:hover{border-color:#3b82f6}
+.ib{display:flex;align-items:flex-end;gap:4px;padding:6px 8px;border-top:1px solid rgba(59,90,96,0.15);flex-shrink:0}
+.ib textarea{flex:1;padding:5px 7px;font-size:8px;outline:none;resize:none;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;min-height:26px;max-height:80px;background:#f8fafc}
+.ib button{width:26px;height:26px;background:#3b82f6;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ib button svg{width:12px;height:12px;fill:#fff}
+.ft{padding:3px 10px;font-size:6px;color:#94a3b8;text-align:center;border-top:1px solid rgba(59,90,96,0.08);flex-shrink:0}
 </style>
 </head>
 <body>
-<div class="screen active" id="s1" onclick="showS(2)"><div class="fab"><img id="L1" alt="EG"/></div><div class="fab-l">Ask AI</div></div>
-<div class="screen" id="s2"><div class="lc">
-  <div class="lc-i"><img id="L2" alt="EG" style="width:26px;height:26px;border-radius:5px"/></div>
-  <h2>Customer 360 – Ask AI</h2><div class="sub">Engage & Amplify</div>
-  <div class="dsc">Sign in with your EG account to query live Power BI data.</div>
-  <div class="ls"><label>Step 1 — AI Key (Anthropic)</label><input type="password" id="apiK" placeholder="sk-ant-api03-..."/></div>
-  <div class="ls"><label>Step 2 — Connect to Power BI</label>
-    <button class="lb ms" id="btnMs" onclick="msLogin()"><svg viewBox="0 0 21 21" width="14" height="14"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>Sign in with Microsoft</button>
-    <div class="st" id="msS"></div>
-  </div>
-  <button class="bk" onclick="showS(1)">&larr; Back</button>
-</div></div>
-<div class="screen" id="s3">
-  <div class="hdr"><img id="L3" alt="EG" style="width:24px;height:24px;border-radius:6px"/><div><h1>Customer 360 – Ask AI <span class="live">LIVE</span></h1><p>Engage & Amplify</p></div><button class="bx" onclick="showS(1)">&times;</button></div>
-  <div class="dsc2">Ask about any customer — live from Power BI.</div>
-  <div class="mb"><span>Source:</span><button class="mt a" id="mK" onclick="setM('kpi')">KPI Measures</button><button class="mt" id="mD" onclick="setM('dwh')">DWH Tables</button><button class="mt" id="mB" onclick="setM('both')">Both</button></div>
-  <div class="msgs" id="msgs"><div id="sgB">
-    <button class="sg" onclick="askS(this)">Region Hovedstaden 202602</button>
-    <button class="sg" onclick="askS(this)">Coop Norge Sa 202602</button>
-    <button class="sg" onclick="askS(this)">Esbjerg Kommune 202603</button>
-  </div></div>
-  <div class="ft">Live data from Power BI. AI content may have mistakes.</div>
-  <div class="ib"><textarea id="uI" placeholder="Ask about your data..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea><button onclick="send()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button></div>
+
+<div class="screen active" id="s1">
+  <div class="fab"><img class="eglogo" alt="EG"/></div>
+  <div class="fab-l">Ask AI</div>
 </div>
+
+<div class="screen" id="s2">
+  <div class="lc">
+    <div class="lc-i"><img class="eglogo" alt="EG" style="width:52px;height:52px;border-radius:12px"/></div>
+    <h2>Customer 360 – Ask AI</h2>
+    <div class="sub">Engage &amp; Amplify</div>
+    <div class="desc">Sign in with your EG Microsoft account to query live Power BI data. Enter your AI key for natural language responses.</div>
+    <div class="ls">
+      <label>Step 1 — AI Key (Anthropic)</label>
+      <input type="password" id="apiK" placeholder="sk-ant-api03-..."/>
+    </div>
+    <div class="ls">
+      <label>Step 2 — Connect to Power BI</label>
+      <button class="btn btn-ms" id="btnMs">
+        <svg viewBox="0 0 21 21" width="14" height="14"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Sign in with Microsoft
+      </button>
+      <div class="st" id="msS"></div>
+    </div>
+    <button class="bk" id="btnBack">&larr; Back</button>
+  </div>
+</div>
+
+<div class="screen" id="s3">
+  <div class="hdr">
+    <img class="eglogo" alt="EG" style="width:24px;height:24px;border-radius:6px"/>
+    <div><h1>Customer 360 – Ask AI <span class="live">LIVE</span></h1><p>Engage &amp; Amplify</p></div>
+    <button class="bx" id="btnClose">&times;</button>
+  </div>
+  <div class="dsc2">Ask about any customer — live data from Power BI.</div>
+  <div class="mb">
+    <span>Source:</span>
+    <button class="mt a" id="mK">KPI Measures</button>
+    <button class="mt" id="mD">DWH Tables</button>
+    <button class="mt" id="mB">Both</button>
+  </div>
+  <div class="msgs" id="msgs">
+    <div id="sgB">
+      <button class="sg" data-q="Region Hovedstaden 202602">Region Hovedstaden 202602</button>
+      <button class="sg" data-q="Coop Norge Sa 202602">Coop Norge Sa 202602</button>
+      <button class="sg" data-q="Esbjerg Kommune 202603">Esbjerg Kommune 202603</button>
+    </div>
+  </div>
+  <div class="ft">Live data from Power BI. AI content may have mistakes.</div>
+  <div class="ib">
+    <textarea id="uI" placeholder="Ask about your data..." rows="1"></textarea>
+    <button id="btnSend"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+  </div>
+</div>
+
 <script>
-var CFG={cid:'df9a6902-2129-4a44-83b9-46a01a1fda1a',tid:'b1bc47a9-e2bc-4220-bdb5-7244799f5e49',wid:'0cccd467-8d89-4b0f-a6f1-3285eeb6a11a',did:'8ec0f1f4-1ac9-45f2-908f-da1058316c57'};
-var AK='',tk=null,hist=[],busy=false;
-window.dm='kpi';window._lc=null;
-var LG="data:image/png;base64,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";
+// === CONFIG ===
+var CFG = {
+  cid: 'df9a6902-2129-4a44-83b9-46a01a1fda1a',
+  tid: 'b1bc47a9-e2bc-4220-bdb5-7244799f5e49',
+  wid: '0cccd467-8d89-4b0f-a6f1-3285eeb6a11a',
+  did: '8ec0f1f4-1ac9-45f2-908f-da1058316c57'
+};
+var AK = '', tk = null, hist = [], busy = false;
+var dataMode = 'kpi', lastCust = null;
 
-function showS(n){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById('s'+n).classList.add('active')}
+// === LOGO (injected by build script) ===
+var LOGO_B64 = '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';
 
-// === IMPLICIT GRANT FLOW (no MSAL, no popup, no cookies) ===
-function msLogin(){
-  var key=document.getElementById('apiK').value.trim();
-  if(!key){document.getElementById('msS').textContent='Enter AI key first (Step 1)';document.getElementById('msS').className='st err';return}
-  // Encode API key in state so it survives the redirect
-  var state=btoa(JSON.stringify({k:key,t:Date.now()}));
-  var authUrl='https://login.microsoftonline.com/'+CFG.tid+'/oauth2/v2.0/authorize'
-    +'?client_id='+CFG.cid
-    +'&response_type=token'
-    +'&redirect_uri='+encodeURIComponent(window.location.origin+window.location.pathname)
-    +'&scope='+encodeURIComponent('https://analysis.windows.net/powerbi/api/Dataset.Read.All')
-    +'&state='+encodeURIComponent(state)
-    +'&nonce='+Math.random().toString(36).substr(2);
-  // Navigate the iframe to Azure AD login
-  window.location.href=authUrl;
+// === SCREENS ===
+function showS(n) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  document.getElementById('s' + n).classList.add('active');
 }
 
-// On page load: check if we're returning from Azure AD with a token
-function checkRedirect(){
-  var hash=window.location.hash;
-  if(!hash||hash.indexOf('access_token')===-1) return false;
-  // Parse the hash fragment
-  var params={};
-  hash.substr(1).split('&').forEach(function(p){var kv=p.split('=');params[kv[0]]=decodeURIComponent(kv[1]||'')});
-  if(params.access_token){
-    tk=params.access_token;
-    // Recover API key from state
-    if(params.state){
-      try{var s=JSON.parse(atob(params.state));if(s.k)AK=s.k}catch(e){}
+// === AUTH: Implicit Grant Redirect (no MSAL, no popup, no cookies) ===
+function msLogin() {
+  var key = document.getElementById('apiK').value.trim();
+  if (!key) {
+    document.getElementById('msS').textContent = 'Please enter AI key first (Step 1)';
+    document.getElementById('msS').style.color = '#ef4444';
+    return;
+  }
+  var state = btoa(JSON.stringify({ k: key }));
+  var url = 'https://login.microsoftonline.com/' + CFG.tid + '/oauth2/v2.0/authorize'
+    + '?client_id=' + CFG.cid
+    + '&response_type=token'
+    + '&redirect_uri=' + encodeURIComponent(window.location.origin + window.location.pathname)
+    + '&scope=' + encodeURIComponent('https://analysis.windows.net/powerbi/api/Dataset.Read.All')
+    + '&state=' + encodeURIComponent(state)
+    + '&nonce=' + Math.random().toString(36).substr(2);
+  window.location.href = url;
+}
+
+function checkRedirect() {
+  var hash = window.location.hash;
+  if (!hash || hash.indexOf('access_token') === -1) return false;
+  var params = {};
+  hash.substr(1).split('&').forEach(function(p) {
+    var kv = p.split('=');
+    params[kv[0]] = decodeURIComponent(kv[1] || '');
+  });
+  if (params.access_token) {
+    tk = params.access_token;
+    if (params.state) {
+      try { var s = JSON.parse(atob(decodeURIComponent(params.state))); if (s.k) AK = s.k; } catch(e) {}
     }
-    // Clean the URL hash
-    history.replaceState(null,'',window.location.pathname);
+    try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
     return true;
   }
-  // Check for errors
-  if(params.error){
-    document.getElementById('msS').textContent=params.error_description||params.error;
-    document.getElementById('msS').className='st err';
+  if (params.error) {
+    setTimeout(function() {
+      document.getElementById('msS').textContent = (params.error_description || params.error);
+      document.getElementById('msS').style.color = '#ef4444';
+      showS(2);
+    }, 100);
   }
   return false;
 }
 
 // === POWER BI API ===
-function dax(q){
-  return fetch('https://api.powerbi.com/v1.0/myorg/groups/'+CFG.wid+'/datasets/'+CFG.did+'/executeQueries',{
-    method:'POST',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json'},
-    body:JSON.stringify({queries:[{query:q}],serializerSettings:{includeNulls:true}})
-  }).then(function(r){
-    if(r.status===401){tk=null;throw new Error('Session expired — click Sign in again')}
-    if(!r.ok) return r.json().then(function(e){throw new Error(e&&e.error&&e.error.message||'PBI error')});
-    return r.json().then(function(d){return d.results[0].tables[0].rows});
+function executeDax(q) {
+  var url = 'https://api.powerbi.com/v1.0/myorg/groups/' + CFG.wid + '/datasets/' + CFG.did + '/executeQueries';
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + tk, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ queries: [{ query: q }], serializerSettings: { includeNulls: true } })
+  }).then(function(r) {
+    if (r.status === 401) { tk = null; throw new Error('Session expired — sign in again'); }
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e && e.error ? e.error.message : 'PBI error'); });
+    return r.json().then(function(d) { return d.results[0].tables[0].rows; });
   });
 }
 
-function kQ(c,m){var f="'SB_FactCustomer'[Account Name]=""+c+""";var t=m?",'SB_DimDate'[YYYYMM]=""+m+""":"";return 'EVALUATE ROW("MRR",ROUND(CALCULATE([SB_MRR],'+f+t+'),0),"Growth",ROUND(CALCULATE([SB_Growth_test]*100,'+f+t+'),1),"NRR",ROUND(CALCULATE([SB_NRR_test]*100,'+f+t+'),1),"GRR",ROUND(CALCULATE([SB_GRR_test]*100,'+f+t+'),1))'}
-function cQ(c,m){var f="'CS_datamart dimAccount'[Name]=""+c+""";var t=m?",'CS_datamart dimTime'[YYYYMM]=""+m+""":"";return 'EVALUATE ROW("Opened",CALCULATE([CS_Cases],'+f+t+'),"Closed",CALCULATE([CS_Closed Cases1],'+f+t+'),"Backlog",CALCULATE([CS_Backlog - Monthly Reporting],'+f+t+'))'}
-function dQ(c){var f="'SB_FactCustomer'[Account Name]=""+c+""";return 'EVALUATE ROW("Y24",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]),'+f+',YEAR('SB_FactCustomer'[Period])=2024),2),"Y25",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]),'+f+',YEAR('SB_FactCustomer'[Period])=2025),2),"Y26",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR]),'+f+',YEAR('SB_FactCustomer'[Period])=2026),2))'}
-function iQ(c){return 'EVALUATE TOPN(1,FILTER(SUMMARIZE('SB_FactCustomer','SB_FactCustomer'[Account Name],'SB_FactCustomer'[BU],'SB_FactCustomer'[Account Country]),'SB_FactCustomer'[Account Name]="'+c+'"))'}
-
-function xP(q){
-  var lq=q.toLowerCase();var ym=null;
-  var m=lq.match(/(2024|2025|2026)(0[1-9]|1[0-2])/);if(m)ym=m[0];
-  if(!ym){var ms={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12',january:'01',february:'02',march:'03',april:'04',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12'};for(var n in ms){var p1=lq.match(new RegExp(n+'\\s*(2024|2025|2026)'));var p2=lq.match(new RegExp('(2024|2025|2026)\\s*'+n));if(p1){ym=p1[1]+ms[n];break}if(p2){ym=p2[1]+ms[n];break}}}
-  var cl=q.replace(/\d{6}/g,'').replace(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s*(2024|2025|2026)/gi,'').replace(/(2024|2025|2026)\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)/gi,'').trim();
-  var cu=null;if(cl.length>2)cu=cl.replace(/^(show|give|tell|what|how|me|is|about|for|the|of|in|data|everything|full|360|view)\s+/gi,'').replace(/\s+(data|kpi|revenue|mrr|growth|cases|info|details|for)$/gi,'').trim();
-  if(cu&&cu.length<3)cu=null;if(!cu&&window._lc)cu=window._lc;if(cu)window._lc=cu;
-  return{customer:cu,yyyymm:ym};
+function buildKpi(c, m) {
+  var f = "'SB_FactCustomer'[Account Name]=\"" + c + "\"";
+  var t = m ? ",'SB_DimDate'[YYYYMM]=\"" + m + "\"" : "";
+  return 'EVALUATE ROW("MRR",ROUND(CALCULATE([SB_MRR],' + f + t + '),0),"Growth",ROUND(CALCULATE([SB_Growth_test]*100,' + f + t + '),1),"NRR",ROUND(CALCULATE([SB_NRR_test]*100,' + f + t + '),1),"GRR",ROUND(CALCULATE([SB_GRR_test]*100,' + f + t + '),1))';
+}
+function buildCs(c, m) {
+  var f = "'CS_datamart dimAccount'[Name]=\"" + c + "\"";
+  var t = m ? ",'CS_datamart dimTime'[YYYYMM]=\"" + m + "\"" : "";
+  return 'EVALUATE ROW("Opened",CALCULATE([CS_Cases],' + f + t + '),"Closed",CALCULATE([CS_Closed Cases1],' + f + t + '),"Backlog",CALCULATE([CS_Backlog - Monthly Reporting],' + f + t + '))';
+}
+function buildDwh(c) {
+  var f = "'SB_FactCustomer'[Account Name]=\"" + c + "\"";
+  return "EVALUATE ROW(\"Y24\",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR])," + f + ",YEAR('SB_FactCustomer'[Period])=2024),2),\"Y25\",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR])," + f + ",YEAR('SB_FactCustomer'[Period])=2025),2),\"Y26\",ROUND(CALCULATE(SUM('SB_FactCustomer'[DKK BR])," + f + ",YEAR('SB_FactCustomer'[Period])=2026),2))";
+}
+function buildInfo(c) {
+  return "EVALUATE TOPN(1,FILTER(SUMMARIZE('SB_FactCustomer','SB_FactCustomer'[Account Name],'SB_FactCustomer'[BU],'SB_FactCustomer'[Account Country]),'SB_FactCustomer'[Account Name]=\"" + c + "\"))";
 }
 
-function qPBI(c,ym){
-  var md=window.dm,r={};
-  return dax(iQ(c)).then(function(i){if(i&&i.length>0){r.bu=i[0]["'SB_FactCustomer'[BU]"]||'?';r.co=i[0]["'SB_FactCustomer'[Account Country]"]||'?';r.en=i[0]["'SB_FactCustomer'[Account Name]"]||c}else{r.bu='?';r.co='?';r.en=c}}).catch(function(){r.bu='?';r.co='?';r.en=c})
-  .then(function(){var nm=r.en||c;var ps=[];
-    if(md==='kpi'||md==='both')ps.push(dax(kQ(nm,ym)).then(function(k){if(k&&k.length>0)r.kpi=k[0]}).catch(function(e){r.ke=e.message}));
-    ps.push(dax(cQ(nm,ym)).then(function(cs){if(cs&&cs.length>0)r.cs=cs[0]}).catch(function(e){r.ce=e.message}));
-    if(md==='dwh'||md==='both')ps.push(dax(dQ(nm)).then(function(d){if(d&&d.length>0)r.dwh=d[0]}).catch(function(e){r.de=e.message}));
+// === EXTRACT PARAMS ===
+function extractParams(q) {
+  var lq = q.toLowerCase();
+  var ym = null;
+  var m = lq.match(/\b(2024|2025|2026)(0[1-9]|1[0-2])\b/);
+  if (m) ym = m[0];
+  if (!ym) {
+    var ms = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    for (var n in ms) {
+      var p1 = lq.match(new RegExp(n + '\\s*(2024|2025|2026)'));
+      var p2 = lq.match(new RegExp('(2024|2025|2026)\\s*' + n));
+      if (p1) { ym = p1[1] + ms[n]; break; }
+      if (p2) { ym = p2[1] + ms[n]; break; }
+    }
+  }
+  var cl = q.replace(/\b\d{6}\b/g, '').replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*(2024|2025|2026)\b/gi, '').replace(/\b(2024|2025|2026)\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/gi, '').trim();
+  var cu = null;
+  if (cl.length > 2) cu = cl.replace(/^(show|give|tell|what|how|me|is|about|for|the|of|in|data|everything|full|360|view)\s+/gi, '').replace(/\s+(data|kpi|revenue|mrr|growth|cases|info|details|for)$/gi, '').trim();
+  if (cu && cu.length < 3) cu = null;
+  if (!cu && lastCust) cu = lastCust;
+  if (cu) lastCust = cu;
+  return { customer: cu, yyyymm: ym };
+}
+
+// === QUERY PBI ===
+function queryPBI(c, ym) {
+  var md = dataMode, r = {};
+  return executeDax(buildInfo(c)).then(function(i) {
+    if (i && i.length > 0) {
+      r.bu = i[0]["'SB_FactCustomer'[BU]"] || '?';
+      r.co = i[0]["'SB_FactCustomer'[Account Country]"] || '?';
+      r.en = i[0]["'SB_FactCustomer'[Account Name]"] || c;
+    } else { r.bu = '?'; r.co = '?'; r.en = c; }
+  }).catch(function() { r.bu = '?'; r.co = '?'; r.en = c; })
+  .then(function() {
+    var nm = r.en || c;
+    var ps = [];
+    if (md === 'kpi' || md === 'both') ps.push(executeDax(buildKpi(nm, ym)).then(function(k) { if (k && k.length) r.kpi = k[0]; }).catch(function(e) { r.ke = e.message; }));
+    ps.push(executeDax(buildCs(nm, ym)).then(function(cs) { if (cs && cs.length) r.cs = cs[0]; }).catch(function(e) { r.ce = e.message; }));
+    if (md === 'dwh' || md === 'both') ps.push(executeDax(buildDwh(nm)).then(function(d) { if (d && d.length) r.dwh = d[0]; }).catch(function(e) { r.de = e.message; }));
     return Promise.all(ps);
-  }).then(function(){return r});
+  }).then(function() { return r; });
 }
 
-function setM(m){window.dm=m;document.querySelectorAll('.mt').forEach(function(b){b.classList.remove('a')});document.getElementById(m==='kpi'?'mK':m==='dwh'?'mD':'mB').classList.add('a')}
-function addMsg(role,txt){var sb=document.getElementById('sgB');if(sb)sb.remove();var c=document.getElementById('msgs');var d=document.createElement('div');d.className='msg '+role;var a=document.createElement('div');a.className='ma';a.textContent=role==='ai'?'EG':'You';var b=document.createElement('div');b.className='mv';b.innerHTML=txt.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/
-/g,'<br>');d.appendChild(a);d.appendChild(b);c.appendChild(d);c.scrollTop=c.scrollHeight}
-function addTp(){var c=document.getElementById('msgs');var d=document.createElement('div');d.className='msg ai';d.id='tp';d.innerHTML='<div class="ma">EG</div><div class="tp"><span></span><span></span><span></span></div>';c.appendChild(d);c.scrollTop=c.scrollHeight}
-function rmTp(){var e=document.getElementById('tp');if(e)e.remove()}
-function askS(el){document.getElementById('uI').value=el.textContent;send()}
+// === UI HELPERS ===
+function addMsg(role, txt) {
+  var sb = document.getElementById('sgB');
+  if (sb) sb.remove();
+  var c = document.getElementById('msgs');
+  var d = document.createElement('div');
+  d.className = 'msg ' + role;
+  var a = document.createElement('div');
+  a.className = 'ma';
+  a.textContent = role === 'ai' ? 'EG' : 'You';
+  var b = document.createElement('div');
+  b.className = 'mv';
+  b.innerHTML = txt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  d.appendChild(a);
+  d.appendChild(b);
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+function addTp() {
+  var c = document.getElementById('msgs');
+  var d = document.createElement('div');
+  d.className = 'msg ai';
+  d.id = 'tp';
+  d.innerHTML = '<div class="ma">EG</div><div class="tp"><span></span><span></span><span></span></div>';
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+function rmTp() { var e = document.getElementById('tp'); if (e) e.remove(); }
 
-function send(){
-  var ip=document.getElementById('uI');var txt=ip.value.trim();if(!txt||busy)return;ip.value='';busy=true;
-  addMsg('user',txt);addTp();
-  if(!tk){rmTp();addMsg('ai','Please sign in with Microsoft first.');busy=false;return}
-  var p=xP(txt);
-  var prom=p.customer?qPBI(p.customer,p.yyyymm):Promise.resolve(null);
-  prom.then(function(pb){
-    var md=window.dm;
-    var sys='You are the AI for Customer 360 at EG A/S. LIVE Power BI data. Mode: '+(md==='kpi'?'KPI':md==='dwh'?'DWH':'Both');
-    if(pb){
-      sys+='\nLIVE DATA:\nCustomer: '+(pb.en||p.customer)+' | BU: '+pb.bu+' | Country: '+pb.co;
-      if(p.yyyymm)sys+='\nPeriod: '+p.yyyymm;
-      if(pb.kpi){var k=pb.kpi;sys+='\nKPI'+(p.yyyymm?' '+p.yyyymm:'')+': MRR='+k['[MRR]']+' | Growth='+k['[Growth]']+'% | NRR='+k['[NRR]']+'% | GRR='+k['[GRR]']+'%'}
-      if(pb.cs){var cs=pb.cs;sys+='\nCases: Opened='+cs['[Opened]']+' | Closed='+cs['[Closed]']+' | Backlog='+cs['[Backlog]']}
-      if(pb.dwh){var d=pb.dwh;sys+='\nDWH: 2024='+d['[Y24]']+'M | 2025='+d['[Y25]']+'M | 2026='+d['[Y26]']+'M'}
-    }else{sys+='\nNo customer found. Ask user to include customer name + YYYYMM.'}
-    sys+='\nPresent clearly. Side-by-side table if Both. Brief insight. "--" for null. LIVE data.';
-    hist.push({role:'user',content:txt});
-    return fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':AK,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,system:sys,messages:hist.slice(-10)})});
-  }).then(function(r){
+// === SEND MESSAGE ===
+function send() {
+  var ip = document.getElementById('uI');
+  var txt = ip.value.trim();
+  if (!txt || busy) return;
+  ip.value = '';
+  busy = true;
+  addMsg('user', txt);
+  addTp();
+  if (!tk) { rmTp(); addMsg('ai', 'Please sign in with Microsoft first.'); busy = false; return; }
+  var p = extractParams(txt);
+  var prom = p.customer ? queryPBI(p.customer, p.yyyymm) : Promise.resolve(null);
+  prom.then(function(pb) {
+    var sys = 'You are the AI for Customer 360 at EG A/S. LIVE Power BI data. Mode: ' + (dataMode === 'kpi' ? 'KPI' : dataMode === 'dwh' ? 'DWH' : 'Both');
+    if (pb) {
+      sys += '\nLIVE DATA:\nCustomer: ' + (pb.en || p.customer) + ' | BU: ' + pb.bu + ' | Country: ' + pb.co;
+      if (p.yyyymm) sys += '\nPeriod: ' + p.yyyymm;
+      if (pb.kpi) { var k = pb.kpi; sys += '\nKPI' + (p.yyyymm ? ' ' + p.yyyymm : '') + ': MRR=' + k['[MRR]'] + ' | Growth=' + k['[Growth]'] + '% | NRR=' + k['[NRR]'] + '% | GRR=' + k['[GRR]'] + '%'; }
+      if (pb.cs) { var cs = pb.cs; sys += '\nCases: Opened=' + cs['[Opened]'] + ' | Closed=' + cs['[Closed]'] + ' | Backlog=' + cs['[Backlog]']; }
+      if (pb.dwh) { var dw = pb.dwh; sys += '\nDWH: 2024=' + dw['[Y24]'] + 'M | 2025=' + dw['[Y25]'] + 'M | 2026=' + dw['[Y26]'] + 'M'; }
+    } else { sys += '\nNo customer found. Ask user to include customer name + YYYYMM.'; }
+    sys += '\nPresent clearly. Side-by-side table if Both. Brief insight. "--" for null. LIVE data.';
+    hist.push({ role: 'user', content: txt });
+    return fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': AK, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, system: sys, messages: hist.slice(-10) })
+    });
+  }).then(function(r) {
     rmTp();
-    if(!r.ok) return r.json().then(function(e){addMsg('ai','Error: '+(e&&e.error&&e.error.message||r.status));hist.pop()});
-    return r.json().then(function(d){var rp=d.content.map(function(c){return c.text||''}).join('\n').trim();addMsg('ai',rp);hist.push({role:'assistant',content:rp})});
-  }).catch(function(e){rmTp();addMsg('ai','Error: '+e.message)}).then(function(){busy=false});
+    if (!r.ok) return r.json().then(function(e) { addMsg('ai', 'Error: ' + (e && e.error ? e.error.message : r.status)); hist.pop(); });
+    return r.json().then(function(d) {
+      var rp = d.content.map(function(c) { return c.text || ''; }).join('\n').trim();
+      addMsg('ai', rp);
+      hist.push({ role: 'assistant', content: rp });
+    });
+  }).catch(function(e) { rmTp(); addMsg('ai', 'Error: ' + e.message); })
+  .then(function() { busy = false; });
 }
 
 // === INIT ===
-document.addEventListener('DOMContentLoaded',function(){
-  try{document.getElementById('L1').src=LG}catch(e){};
-  try{document.getElementById('L2').src=LG}catch(e){};
-  try{document.getElementById('L3').src=LG}catch(e){};
-  // Backup click handlers
-  document.getElementById('s1').addEventListener('click',function(){showS(2)});
-  // Check if returning from Azure AD login
-  if(checkRedirect()){
-    // Token + API key recovered from redirect — go straight to chat
+document.addEventListener('DOMContentLoaded', function() {
+  // Set logos
+  var logoSrc = 'data:image/png;base64,' + LOGO_B64;
+  var logos = document.querySelectorAll('.eglogo');
+  for (var i = 0; i < logos.length; i++) logos[i].src = logoSrc;
+
+  // Event listeners (not inline onclick — works in sandboxed iframes)
+  document.getElementById('s1').addEventListener('click', function() { showS(2); });
+  document.getElementById('btnMs').addEventListener('click', msLogin);
+  document.getElementById('btnBack').addEventListener('click', function() { showS(1); });
+  document.getElementById('btnClose').addEventListener('click', function() { showS(1); });
+  document.getElementById('btnSend').addEventListener('click', send);
+  document.getElementById('uI').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  document.getElementById('mK').addEventListener('click', function() { setMode('kpi'); });
+  document.getElementById('mD').addEventListener('click', function() { setMode('dwh'); });
+  document.getElementById('mB').addEventListener('click', function() { setMode('both'); });
+
+  // Suggestion buttons
+  var sgs = document.querySelectorAll('.sg');
+  for (var j = 0; j < sgs.length; j++) {
+    sgs[j].addEventListener('click', function() {
+      document.getElementById('uI').value = this.getAttribute('data-q');
+      send();
+    });
+  }
+
+  function setMode(m) {
+    dataMode = m;
+    var btns = document.querySelectorAll('.mt');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('a');
+    document.getElementById(m === 'kpi' ? 'mK' : m === 'dwh' ? 'mD' : 'mB').classList.add('a');
+  }
+
+  // Check if returning from Azure AD
+  if (checkRedirect()) {
     showS(3);
   }
 });
