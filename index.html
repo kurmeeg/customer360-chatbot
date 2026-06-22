@@ -25,10 +25,12 @@ html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#ff
 .ls{margin-bottom:14px;text-align:left}
 .ls label{font-size:8px;color:#475569;font-weight:500;display:block;margin-bottom:5px}
 .ls input{width:100%;padding:7px 10px;font-size:9px;font-family:'JetBrains Mono',monospace;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc}
-.btn{width:100%;padding:9px;font-size:10px;font-weight:500;border:none;border-radius:8px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px}
-.btn-ms{background:#0078d4;color:#fff}
-.btn-ms:hover{background:#106ebe}
-.st{font-size:8px;margin:6px 0;min-height:14px;color:#64748b}
+.btn{width:100%;padding:9px;font-size:10px;font-weight:500;border:none;border-radius:8px;cursor:pointer;font-family:inherit;background:#3b82f6;color:#fff}
+.btn:hover{background:#2563eb}
+.btn:disabled{background:#94a3b8;cursor:not-allowed}
+.st{font-size:8px;margin:8px 0;min-height:14px;color:#64748b}
+.st.ok{color:#22c55e}
+.st.err{color:#ef4444}
 .bk{font-size:8px;color:#94a3b8;cursor:pointer;margin-top:10px;border:none;background:none;font-family:inherit}
 .hdr{padding:6px 8px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(59,90,96,0.2);flex-shrink:0}
 .hdr img{width:24px;height:24px;border-radius:6px}
@@ -77,19 +79,13 @@ html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#ff
     <div class="lc-i"><img class="eglogo" alt="EG" style="width:52px;height:52px;border-radius:12px"/></div>
     <h2>Customer 360 – Ask AI</h2>
     <div class="sub">Engage &amp; Amplify</div>
-    <div class="desc">Sign in with your EG Microsoft account to query live Power BI data. Enter your AI key for natural language responses.</div>
+    <div class="desc">Enter your AI key to start. Power BI data is queried live in the background.</div>
     <div class="ls">
-      <label>Step 1 — AI Key (Anthropic)</label>
+      <label>Anthropic API Key</label>
       <input type="password" id="apiK" placeholder="sk-ant-api03-..."/>
     </div>
-    <div class="ls">
-      <label>Step 2 — Connect to Power BI</label>
-      <button class="btn btn-ms" id="btnMs">
-        <svg viewBox="0 0 21 21" width="14" height="14"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
-        Sign in with Microsoft
-      </button>
-      <div class="st" id="msS"></div>
-    </div>
+    <div class="st" id="loginSt"></div>
+    <button class="btn" id="btnGo" disabled>Open Chatbot</button>
     <button class="bk" id="btnBack">&larr; Back</button>
   </div>
 </div>
@@ -126,77 +122,54 @@ html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#ff
 var CFG = {
   cid: 'df9a6902-2129-4a44-83b9-46a01a1fda1a',
   tid: 'b1bc47a9-e2bc-4220-bdb5-7244799f5e49',
+  secret: 'EhY8Q~LNcHKGbKog8GTkdSQGXQEORUo-D3103cBJ',
   wid: '0cccd467-8d89-4b0f-a6f1-3285eeb6a11a',
   did: '8ec0f1f4-1ac9-45f2-908f-da1058316c57'
 };
-var AK = '', tk = null, hist = [], busy = false;
+var AK = '', tk = null, tkExp = 0, hist = [], busy = false;
 var dataMode = 'kpi', lastCust = null;
-
-// === LOGO (injected by build script) ===
 var LOGO_B64 = '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';
 
-// === SCREENS ===
 function showS(n) {
-  var screens = document.querySelectorAll('.screen');
-  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var sc = document.querySelectorAll('.screen');
+  for (var i = 0; i < sc.length; i++) sc[i].classList.remove('active');
   document.getElementById('s' + n).classList.add('active');
 }
 
-// === AUTH: Implicit Grant Redirect (no MSAL, no popup, no cookies) ===
-function msLogin() {
-  var key = document.getElementById('apiK').value.trim();
-  if (!key) {
-    document.getElementById('msS').textContent = 'Please enter AI key first (Step 1)';
-    document.getElementById('msS').style.color = '#ef4444';
-    return;
-  }
-  var state = btoa(JSON.stringify({ k: key }));
-  var url = 'https://login.microsoftonline.com/' + CFG.tid + '/oauth2/v2.0/authorize'
-    + '?client_id=' + CFG.cid
-    + '&response_type=token'
-    + '&redirect_uri=' + encodeURIComponent(window.location.origin + window.location.pathname)
-    + '&scope=' + encodeURIComponent('https://analysis.windows.net/powerbi/api/Dataset.Read.All')
-    + '&state=' + encodeURIComponent(state)
-    + '&nonce=' + Math.random().toString(36).substr(2);
-  window.location.href = url;
-}
-
-function checkRedirect() {
-  var hash = window.location.hash;
-  if (!hash || hash.indexOf('access_token') === -1) return false;
-  var params = {};
-  hash.substr(1).split('&').forEach(function(p) {
-    var kv = p.split('=');
-    params[kv[0]] = decodeURIComponent(kv[1] || '');
-  });
-  if (params.access_token) {
-    tk = params.access_token;
-    if (params.state) {
-      try { var s = JSON.parse(atob(decodeURIComponent(params.state))); if (s.k) AK = s.k; } catch(e) {}
-    }
-    try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
-    return true;
-  }
-  if (params.error) {
-    setTimeout(function() {
-      document.getElementById('msS').textContent = (params.error_description || params.error);
-      document.getElementById('msS').style.color = '#ef4444';
-      showS(2);
-    }, 100);
-  }
-  return false;
-}
-
-// === POWER BI API ===
-function executeDax(q) {
-  var url = 'https://api.powerbi.com/v1.0/myorg/groups/' + CFG.wid + '/datasets/' + CFG.did + '/executeQueries';
+// === SERVICE PRINCIPAL TOKEN (client_credentials via fetch) ===
+function getToken() {
+  if (tk && Date.now() < tkExp) return Promise.resolve(tk);
+  var url = 'https://login.microsoftonline.com/' + CFG.tid + '/oauth2/v2.0/token';
+  var body = 'grant_type=client_credentials'
+    + '&client_id=' + encodeURIComponent(CFG.cid)
+    + '&client_secret=' + encodeURIComponent(CFG.secret)
+    + '&scope=' + encodeURIComponent('https://analysis.windows.net/powerbi/api/.default');
   return fetch(url, {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + tk, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ queries: [{ query: q }], serializerSettings: { includeNulls: true } })
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body
   }).then(function(r) {
-    if (r.status === 401) { tk = null; throw new Error('Session expired — sign in again'); }
-    if (!r.ok) return r.json().then(function(e) { throw new Error(e && e.error ? e.error.message : 'PBI error'); });
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e.error_description || e.error || 'Token failed'); });
+    return r.json().then(function(d) {
+      tk = d.access_token;
+      tkExp = Date.now() + (d.expires_in - 60) * 1000;
+      return tk;
+    });
+  });
+}
+
+// === POWER BI QUERY ===
+function executeDax(q) {
+  return getToken().then(function(token) {
+    var url = 'https://api.powerbi.com/v1.0/myorg/groups/' + CFG.wid + '/datasets/' + CFG.did + '/executeQueries';
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ queries: [{ query: q }], serializerSettings: { includeNulls: true } })
+    });
+  }).then(function(r) {
+    if (r.status === 401) { tk = null; tkExp = 0; throw new Error('Auth expired, retry'); }
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e && e.error ? e.error.message : 'PBI error ' + r.status); });
     return r.json().then(function(d) { return d.results[0].tables[0].rows; });
   });
 }
@@ -219,7 +192,6 @@ function buildInfo(c) {
   return "EVALUATE TOPN(1,FILTER(SUMMARIZE('SB_FactCustomer','SB_FactCustomer'[Account Name],'SB_FactCustomer'[BU],'SB_FactCustomer'[Account Country]),'SB_FactCustomer'[Account Name]=\"" + c + "\"))";
 }
 
-// === EXTRACT PARAMS ===
 function extractParams(q) {
   var lq = q.toLowerCase();
   var ym = null;
@@ -234,7 +206,7 @@ function extractParams(q) {
       if (p2) { ym = p2[1] + ms[n]; break; }
     }
   }
-  var cl = q.replace(/\b\d{6}\b/g, '').replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*(2024|2025|2026)\b/gi, '').replace(/\b(2024|2025|2026)\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/gi, '').trim();
+  var cl = q.replace(/\b\d{6}\b/g, '').replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*(2024|2025|2026)\b/gi, '').replace(/\b(2024|2025|2026)\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi, '').trim();
   var cu = null;
   if (cl.length > 2) cu = cl.replace(/^(show|give|tell|what|how|me|is|about|for|the|of|in|data|everything|full|360|view)\s+/gi, '').replace(/\s+(data|kpi|revenue|mrr|growth|cases|info|details|for)$/gi, '').trim();
   if (cu && cu.length < 3) cu = null;
@@ -243,7 +215,6 @@ function extractParams(q) {
   return { customer: cu, yyyymm: ym };
 }
 
-// === QUERY PBI ===
 function queryPBI(c, ym) {
   var md = dataMode, r = {};
   return executeDax(buildInfo(c)).then(function(i) {
@@ -263,7 +234,6 @@ function queryPBI(c, ym) {
   }).then(function() { return r; });
 }
 
-// === UI HELPERS ===
 function addMsg(role, txt) {
   var sb = document.getElementById('sgB');
   if (sb) sb.remove();
@@ -284,24 +254,18 @@ function addMsg(role, txt) {
 function addTp() {
   var c = document.getElementById('msgs');
   var d = document.createElement('div');
-  d.className = 'msg ai';
-  d.id = 'tp';
+  d.className = 'msg ai'; d.id = 'tp';
   d.innerHTML = '<div class="ma">EG</div><div class="tp"><span></span><span></span><span></span></div>';
-  c.appendChild(d);
-  c.scrollTop = c.scrollHeight;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
 }
 function rmTp() { var e = document.getElementById('tp'); if (e) e.remove(); }
 
-// === SEND MESSAGE ===
 function send() {
   var ip = document.getElementById('uI');
   var txt = ip.value.trim();
   if (!txt || busy) return;
-  ip.value = '';
-  busy = true;
-  addMsg('user', txt);
-  addTp();
-  if (!tk) { rmTp(); addMsg('ai', 'Please sign in with Microsoft first.'); busy = false; return; }
+  ip.value = ''; busy = true;
+  addMsg('user', txt); addTp();
   var p = extractParams(txt);
   var prom = p.customer ? queryPBI(p.customer, p.yyyymm) : Promise.resolve(null);
   prom.then(function(pb) {
@@ -312,7 +276,8 @@ function send() {
       if (pb.kpi) { var k = pb.kpi; sys += '\nKPI' + (p.yyyymm ? ' ' + p.yyyymm : '') + ': MRR=' + k['[MRR]'] + ' | Growth=' + k['[Growth]'] + '% | NRR=' + k['[NRR]'] + '% | GRR=' + k['[GRR]'] + '%'; }
       if (pb.cs) { var cs = pb.cs; sys += '\nCases: Opened=' + cs['[Opened]'] + ' | Closed=' + cs['[Closed]'] + ' | Backlog=' + cs['[Backlog]']; }
       if (pb.dwh) { var dw = pb.dwh; sys += '\nDWH: 2024=' + dw['[Y24]'] + 'M | 2025=' + dw['[Y25]'] + 'M | 2026=' + dw['[Y26]'] + 'M'; }
-    } else { sys += '\nNo customer found. Ask user to include customer name + YYYYMM.'; }
+      if (pb.ke) sys += '\n(KPI query note: ' + pb.ke + ')';
+    } else { sys += '\nNo customer found. Ask user to include a customer name and YYYYMM period.'; }
     sys += '\nPresent clearly. Side-by-side table if Both. Brief insight. "--" for null. LIVE data.';
     hist.push({ role: 'user', content: txt });
     return fetch('https://api.anthropic.com/v1/messages', {
@@ -332,34 +297,41 @@ function send() {
   .then(function() { busy = false; });
 }
 
-// === INIT ===
 document.addEventListener('DOMContentLoaded', function() {
-  // Set logos
   var logoSrc = 'data:image/png;base64,' + LOGO_B64;
   var logos = document.querySelectorAll('.eglogo');
   for (var i = 0; i < logos.length; i++) logos[i].src = logoSrc;
 
-  // Event listeners (not inline onclick — works in sandboxed iframes)
   document.getElementById('s1').addEventListener('click', function() { showS(2); });
-  document.getElementById('btnMs').addEventListener('click', msLogin);
   document.getElementById('btnBack').addEventListener('click', function() { showS(1); });
   document.getElementById('btnClose').addEventListener('click', function() { showS(1); });
   document.getElementById('btnSend').addEventListener('click', send);
   document.getElementById('uI').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
-  document.getElementById('mK').addEventListener('click', function() { setMode('kpi'); });
-  document.getElementById('mD').addEventListener('click', function() { setMode('dwh'); });
-  document.getElementById('mB').addEventListener('click', function() { setMode('both'); });
 
-  // Suggestion buttons
-  var sgs = document.querySelectorAll('.sg');
-  for (var j = 0; j < sgs.length; j++) {
-    sgs[j].addEventListener('click', function() {
-      document.getElementById('uI').value = this.getAttribute('data-q');
-      send();
+  var apiInput = document.getElementById('apiK');
+  apiInput.addEventListener('input', function() {
+    document.getElementById('btnGo').disabled = !apiInput.value.trim();
+  });
+
+  document.getElementById('btnGo').addEventListener('click', function() {
+    AK = apiInput.value.trim();
+    if (!AK) return;
+    var st = document.getElementById('loginSt');
+    st.textContent = 'Testing Power BI connection...';
+    st.className = 'st';
+    // Test the service principal token
+    getToken().then(function() {
+      st.textContent = 'Connected!';
+      st.className = 'st ok';
+      setTimeout(function() { showS(3); }, 400);
+    }).catch(function(e) {
+      st.textContent = 'PBI note: ' + e.message + ' (entering anyway)';
+      st.className = 'st err';
+      setTimeout(function() { showS(3); }, 1500);
     });
-  }
+  });
 
   function setMode(m) {
     dataMode = m;
@@ -367,10 +339,16 @@ document.addEventListener('DOMContentLoaded', function() {
     for (var i = 0; i < btns.length; i++) btns[i].classList.remove('a');
     document.getElementById(m === 'kpi' ? 'mK' : m === 'dwh' ? 'mD' : 'mB').classList.add('a');
   }
+  document.getElementById('mK').addEventListener('click', function() { setMode('kpi'); });
+  document.getElementById('mD').addEventListener('click', function() { setMode('dwh'); });
+  document.getElementById('mB').addEventListener('click', function() { setMode('both'); });
 
-  // Check if returning from Azure AD
-  if (checkRedirect()) {
-    showS(3);
+  var sgs = document.querySelectorAll('.sg');
+  for (var j = 0; j < sgs.length; j++) {
+    sgs[j].addEventListener('click', function() {
+      document.getElementById('uI').value = this.getAttribute('data-q');
+      send();
+    });
   }
 });
 </script>
